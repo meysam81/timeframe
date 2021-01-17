@@ -40,10 +40,25 @@ class BatchTimeFrame(BaseTimeFrame):
         if not isinstance(time_frames, Iterable):
             raise TypeError(f"{time_frames} should be an iterable")
 
-        self.time_frames = sorted(time_frames, key=lambda tf: tf.start)
+        if not all(map(self._is_timeframe_or_empty, time_frames)):
+            raise TypeError("Every iterable element should be a BaseTimeFrame")
+
+        # TODO: remove overlaps
+        self.time_frames = sorted(
+            set(tf for tf in time_frames if isinstance(tf, TimeFrame))
+        )
+
+    @staticmethod
+    def _is_timeframe_or_empty(obj) -> bool:
+        # nested batches is not allowed
+        return isinstance(obj, (TimeFrame, _Empty))
 
     def __iter__(self):
         return iter(self.time_frames)
+
+    @property
+    def len_timeframes(self):
+        return len(self.time_frames)
 
     @property
     def duration(self) -> float:
@@ -316,3 +331,6 @@ class TimeFrame(BaseTimeFrame):
 
     def __repr__(self) -> str:
         return f"{self.start.isoformat()}#{self.end.isoformat()}"
+
+    def __hash__(self) -> int:
+        return hash(self.__repr__())
