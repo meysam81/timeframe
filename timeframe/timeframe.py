@@ -43,17 +43,18 @@ class BatchTimeFrame(BaseTimeFrame):
         if not all(map(self._is_timeframe_or_empty, time_frames)):
             raise TypeError("Every iterable element should be a BaseTimeFrame")
 
-        # TODO: remove overlaps
-        self.time_frames = sorted(
+        self.time_frames = []
+        for assertion in sorted(
             set(tf for tf in time_frames if isinstance(tf, TimeFrame))
-        )
+        ):
+            self._extend(assertion)
 
     @staticmethod
     def _is_timeframe_or_empty(obj) -> bool:
         # nested batches is not allowed
         return isinstance(obj, (TimeFrame, _Empty))
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable["TimeFrame"]:
         return iter(self.time_frames)
 
     @property
@@ -63,6 +64,19 @@ class BatchTimeFrame(BaseTimeFrame):
     @property
     def duration(self) -> float:
         return sum(time_frame.duration for time_frame in self)
+
+    def _extend(self, tf: "TimeFrame"):
+        # TODO: There might be a better solution to reduce the time complexity
+        for index, current_timeframe in enumerate(self):
+            if current_timeframe._has_common_ground(tf):
+                last_tf = self.time_frames.pop(index)
+                # to avoid overlapped elements, every new extension should be
+                # compared to our current elements, so that we can reextend if
+                # possible
+                self._extend(last_tf + tf)
+                break
+        else:
+            self.time_frames.append(tf)
 
     def includes(self, tf: BaseTimeFrame) -> bool:
         if not isinstance(tf, BaseTimeFrame):
@@ -282,6 +296,10 @@ class TimeFrame(BaseTimeFrame):
 
     def __add__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
         """Return the summation of two timeframes"""
+
+        # This is because of the way `reduce` works when no initial value is set
+        if isinstance(tf, int) and tf == 0:
+            return self
 
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
