@@ -1,0 +1,8 @@
+.coverage
+.tox
+.vscode
+htmlcov
+**/*.egg-info
+coverage.xml
+test/__pycache__ timeframe/__pycache__
+**/*.py[cod]
