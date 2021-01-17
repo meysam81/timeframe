@@ -1,4 +1,5 @@
 from datetime import datetime
+from functools import reduce
 
 import pytest
 
@@ -47,6 +48,33 @@ def test_batch_timeframe_initialze_wrong_type_raises_type_error():
 
     with pytest.raises(TypeError):
         BatchTimeFrame([TimeFrame(datetime(2021, 1, 17), datetime(2021, 1, 18)), 1])
+
+
+def test_batch_timeframe_initialze_empty_list_is_find_as_well():
+    btf = BatchTimeFrame([])
+
+    assert btf.duration == 0
+
+
+def test_batch_timeframe_initialze_with_overlapped_elements_prunes_extras():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 17, 10, 30), datetime(2021, 1, 17, 13))
+    tf5 = TimeFrame(datetime(2021, 1, 17, 14, 30), datetime(2021, 1, 17, 14, 40))
+    TimeFrame(datetime(2021, 1, 17, 14, 50), datetime(2021, 1, 17, 17))
+    tf7 = TimeFrame(datetime(2021, 1, 17, 14, 35), datetime(2021, 1, 17, 18, 30))
+
+    tf_list = [tf1, tf2, tf3, tf4, tf5, tf5, tf7]
+
+    # union = reduce(lambda x, y: x + y, tf_list[1:], tf_list[0])
+    union = reduce(lambda x, y: x + y, tf_list)
+    expected_len = 2  # calculated manually
+
+    btf = BatchTimeFrame(tf_list)
+
+    assert btf.duration == union.duration
+    assert btf.len_timeframes == expected_len
 
 
 def test_batch_timeframe_includes_another_batch_timeframe_with_overlap():
@@ -112,3 +140,28 @@ def test_batch_timeframe_includes_timeframe_accurately():
     assert not btf.includes(tf4)
     assert btf.includes(tf5)
     assert btf.includes(tf6)
+
+
+def test_batch_timeframe_includes_with_wrong_type_raises_error():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf = BatchTimeFrame(tf_list1)
+
+    with pytest.raises(TypeError):
+        btf.includes(1)
+
+    with pytest.raises(TypeError):
+        btf.includes(1.0)
+
+    with pytest.raises(TypeError):
+        btf.includes("dummy")
+
+    with pytest.raises(TypeError):
+        btf.includes([])
+
+    with pytest.raises(TypeError):
+        btf.includes([1, 1.0, "dummy"])
