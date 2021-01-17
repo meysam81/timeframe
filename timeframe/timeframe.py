@@ -70,9 +70,9 @@ class BatchTimeFrame(BaseTimeFrame):
 
         if isinstance(tf, BatchTimeFrame):
             # we should check if every element in `tf` is covered
-            for current_timeframe in tf:
+            for assertion in tf:
                 for current_timeframe in self:
-                    if current_timeframe.includes(current_timeframe):
+                    if current_timeframe.includes(assertion):
                         break
                 else:
                     return False
@@ -82,18 +82,33 @@ class BatchTimeFrame(BaseTimeFrame):
         for current_timeframe in self:
             if current_timeframe.includes(tf):
                 return True
+
         return False
 
     def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
-        raise RuntimeError(
-            f"Common ground should not be called on {self.__class__.__name__}"
-        )
-
-    def __add__(self, tf: BaseTimeFrame) -> "BatchTimeFrame":
         if not isinstance(tf, BaseTimeFrame):
-            raise TypeError(
-                f"{tf} should be a BaseTimeFrame or a {self.__class__.__name__}"
-            )
+            raise TypeError(f"{tf} should be a BaseTimeFrame")
+
+        if isinstance(tf, _Empty):
+            return False
+
+        if isinstance(tf, BatchTimeFrame):
+            for assertion in tf:
+                for current_timeframe in self:
+                    if current_timeframe._has_common_ground(assertion):
+                        return True
+            return False
+
+        # isinstance(tf, BaseTimeFrame)
+        for current_timeframe in self:
+            if current_timeframe._has_common_ground(tf):
+                return True
+
+        return False
+
+    def __add__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
+        if not isinstance(tf, BaseTimeFrame):
+            raise TypeError(f"{tf} should be a BaseTimeFrame")
 
         if isinstance(tf, BatchTimeFrame):
             candidates = iter(tf)
