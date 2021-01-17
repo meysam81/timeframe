@@ -2,7 +2,7 @@ import abc
 from copy import copy
 from datetime import datetime, timedelta
 from functools import reduce
-from typing import Iterable, List, Union
+from typing import Iterable, Union
 
 
 class BaseTimeFrame(metaclass=abc.ABCMeta):
@@ -165,6 +165,7 @@ class TimeFrame(BaseTimeFrame):
             return self.start <= dt <= self.end
 
         if isinstance(dt, BatchTimeFrame):
+            # the list should contain at least one element
             return all(map(self.includes, dt)) if list(dt) else False
 
         if isinstance(dt, _Empty):
@@ -176,15 +177,40 @@ class TimeFrame(BaseTimeFrame):
     def duration(self) -> float:
         return (self.end - self.start).total_seconds()
 
-    def __gt__(self, tf: "TimeFrame") -> bool:
-        if not isinstance(tf, TimeFrame):
-            raise TypeError(f"{tf} should be a TimeFrame")
+    def __gt__(self, tf: BaseTimeFrame) -> bool:
+        if not isinstance(tf, BaseTimeFrame):
+            raise TypeError(f"{tf} should be a BaseTimeFrame")
+
+        if isinstance(tf, _Empty):
+            return False
+
+        if isinstance(tf, BatchTimeFrame):
+            return all(map(self.__gt__, tf))
+
         return self.end > tf.start
 
-    def __ge__(self, tf: "TimeFrame") -> bool:
+    def __ge__(self, tf: BaseTimeFrame) -> bool:
+        if not isinstance(tf, BaseTimeFrame):
+            raise TypeError(f"{tf} should be a BaseTimeFrame")
+
+        if isinstance(tf, _Empty):
+            return False
+
+        if isinstance(tf, BatchTimeFrame):
+            return all(map(self.__ge__, tf))
+
         return self.__gt__(tf) or self.end >= tf.start
 
-    def __eq__(self, tf: "TimeFrame") -> bool:
+    def __eq__(self, tf: BaseTimeFrame) -> bool:
+        if not isinstance(tf, BaseTimeFrame):
+            raise TypeError(f"{tf} should be a BaseTimeFrame")
+
+        if isinstance(tf, _Empty):
+            return False
+
+        if isinstance(tf, BatchTimeFrame):
+            return all(map(self.__eq__, tf))
+
         return self.start == tf.start and self.end == tf.end
 
     def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
@@ -197,40 +223,58 @@ class TimeFrame(BaseTimeFrame):
         if isinstance(tf, BatchTimeFrame):
             return all(map(self._has_common_ground, tf)) if list(tf) else False
 
-        return self.start <= tf.start <= self.end or self.start <= tf.end <= self.end
+        return (
+            self.start < tf.start < self.end
+            or self.start < tf.end < self.end
+            or tf.start < self.start < tf.end
+            or tf.start < self.end < tf.end
+        )
 
-    def __mul__(self, tf: Union["TimeFrame", List["TimeFrame"]]) -> "TimeFrame":
+    def _has_negligible_difference(self, tf: "TimeFrame") -> bool:
+        return self.start == tf.end or self.end == tf.start
+
+    def __mul__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
         """Return the common slots (overlap) of two or more timeframes"""
 
-        if not isinstance(tf, TimeFrame):
-            raise TypeError(f"{tf} should be a TimeFrame")
+        if not isinstance(tf, BaseTimeFrame):
+            raise TypeError(f"{tf} should be a BaseTimeFrame")
 
-        if self._has_common_ground(tf):
+        if not self._has_common_ground(tf):
+            return _Empty()
+
+        if isinstance(tf, TimeFrame):
             start = max(self.start, tf.start)
             end = min(self.end, tf.end)
             return TimeFrame(start, end)
 
-        return _Empty()
+        # isinstance(tf, BatchTimeFrame)
+        return BatchTimeFrame(map(self.__mul__, tf))
 
-    def __add__(
-        self, tf: Union["TimeFrame", BatchTimeFrame]
-    ) -> Union["TimeFrame", BatchTimeFrame]:
+    def __add__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
         """Return the summation of two timeframes"""
 
-        if not isinstance(tf, (TimeFrame, BatchTimeFrame)):
-            raise TypeError(f"{tf} should be either a TimeFrame or a BatchTimeFrame")
+        if not isinstance(tf, BaseTimeFrame):
+            raise TypeError(f"{tf} should be a BaseTimeFrame")
 
         if isinstance(tf, BatchTimeFrame):
             return tf + self
+
+        if isinstance(tf, _Empty):
+            return self
 
         if self._has_common_ground(tf):
             start = min(self.start, tf.start)
             end = max(self.end, tf.end)
             return TimeFrame(start, end)
 
+        if self._has_negligible_difference(tf):
+            if self < tf:
+                return TimeFrame(self.start, tf.end)
+            return TimeFrame(tf.start, self.end)
+
         return BatchTimeFrame([self, tf])
 
-    def __sub__(self, tf: BaseTimeFrame) -> Union["TimeFrame", BatchTimeFrame]:
+    def __sub__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
         """Remove the portion of the time specified in tf"""
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be either a BaseTimeFrame")
@@ -243,6 +287,7 @@ class TimeFrame(BaseTimeFrame):
         # list of timeframes has to be substracted from either an individual
         # timeframe, which starts from the next `if` section, or from a list
         # of timeframes, which is done in the previous `if` section
+        # TODO: we might not need the line below 🧐
         if isinstance(self, BatchTimeFrame):
             return self - tf
 
@@ -267,9 +312,7 @@ class TimeFrame(BaseTimeFrame):
                 lower = tf.end + timedelta(microseconds=1)
                 upper = self.end
 
-            if lower <= upper:
-                return TimeFrame(lower, upper)
-            return _Empty()
+            return TimeFrame(lower, upper)
 
     def __repr__(self) -> str:
         return f"{self.start.isoformat()}#{self.end.isoformat()}"
