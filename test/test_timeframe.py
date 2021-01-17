@@ -1,7 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
-
 from timeframe import TimeFrame
 
 
@@ -99,3 +98,130 @@ def test_timeframe_greater_than_comparison_raises_type_error():
 
     with pytest.raises(TypeError):
         tf >= "dummy"
+
+
+def test_timeframe_compare_equal_correctly():
+    assert TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11)) == TimeFrame(
+        datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11)
+    )
+
+
+def test_timeframe_compare_unequal_correctly():
+    assert TimeFrame(
+        datetime(2021, 1, 17, microsecond=1), datetime(2021, 1, 17, microsecond=2)
+    ) != TimeFrame(
+        datetime(2021, 1, 17, microsecond=1), datetime(2021, 1, 17, microsecond=3)
+    )
+
+    assert TimeFrame(
+        datetime(2021, 1, 17, microsecond=2), datetime(2021, 1, 17, microsecond=3)
+    ) != TimeFrame(
+        datetime(2021, 1, 17, microsecond=1), datetime(2021, 1, 17, microsecond=3)
+    )
+
+
+def test_timeframe_multiply_gives_accurate_overlap():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 12))
+
+    expected = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    assertion = tf1 * tf2
+
+    assert assertion == expected
+    assert assertion.duration == expected.duration
+
+
+def test_timeframe_multiply_without_overlap_gives_empty():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 9))
+
+    assertion = tf1 * tf2
+
+    assert assertion.duration == 0
+
+
+def test_timeframe_multiply_wrong_type_raises_type_error():
+    tf = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+
+    with pytest.raises(TypeError):
+        tf * 1
+
+    with pytest.raises(TypeError):
+        tf * 1.0
+
+    with pytest.raises(TypeError):
+        tf * "dummy"
+
+
+def test_timeframe_add_with_overlap_gives_accurate_summation():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 12))
+
+    expected = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 12))
+    assertion = tf1 + tf2
+
+    assert assertion == expected
+    assert assertion.duration == expected.duration
+
+
+def test_timeframe_add_with_negligible_diff_gives_accurate_summation():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10))
+
+    expected = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 11))
+    assertion = tf1 + tf2
+
+    assert assertion == expected
+    assert assertion.duration == expected.duration
+
+
+def test_timeframe_add_without_overlap_gives_accurate_summation():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10))
+
+    expected = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 11))
+    assertion = tf1 + tf2
+
+    assert assertion == expected
+    assert assertion.duration == expected.duration
+
+
+def test_timeframe_sub_without_overlap_gives_accurate_substract():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10))
+
+    assertion = tf1 - tf2
+
+    assert assertion == tf1
+    assert assertion.duration == tf1.duration
+
+
+def test_timeframe_sub_with_half_overlap_greater_start_gives_accurate_substract():
+    tf1 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10, 30))
+    tf2 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+
+    expected = TimeFrame(tf1.start, tf2.start - timedelta(microseconds=1))
+    assertion = tf1 - tf2
+
+    assert assertion == expected
+    assert assertion.duration == expected.duration
+
+
+def test_timeframe_sub_with_half_overlap_lower_start_gives_accurate_substract():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10, 30))
+
+    expected = TimeFrame(tf2.end + timedelta(microseconds=1), tf1.end)
+    assertion = tf1 - tf2
+
+    assert assertion == expected
+    assert assertion.duration == expected.duration
+
+
+def test_timeframe_sub_from_superset_gives_accurate_substract():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 8), datetime(2021, 1, 17, 12))
+    tf2 = TimeFrame(datetime(2021, 1, 17, 7), datetime(2021, 1, 17, 13))
+
+    assertion = tf1 - tf2
+
+    assert assertion.duration == 0
