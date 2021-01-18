@@ -49,6 +49,8 @@ class BatchTimeFrame(BaseTimeFrame):
         ):
             self._extend(assertion)
 
+    # TODO: implement __eq__
+
     @staticmethod
     def _is_timeframe_or_empty(obj) -> bool:
         # nested batches is not allowed
@@ -99,6 +101,8 @@ class BatchTimeFrame(BaseTimeFrame):
 
         return False
 
+    # the below method is probably not gonna be used and we might be better off
+    # just deleting it
     def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
@@ -120,27 +124,18 @@ class BatchTimeFrame(BaseTimeFrame):
 
         return False
 
-    def __add__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
+    def __add__(self, tf: BaseTimeFrame) -> "BatchTimeFrame":
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
         if isinstance(tf, BatchTimeFrame):
-            candidates = iter(tf)
+            candidates = list(tf)
         else:
             candidates = [tf]
 
-        result = list(self)
-        # check for duplicates
-        for timeframe in candidates:
-            for current_timeframe in self:
-                if timeframe == current_timeframe:
-                    break
-            else:
-                result.append(timeframe)
+        return BatchTimeFrame(list(self) + candidates)
 
-        return BatchTimeFrame(result)
-
-    def __mul__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
+    def __mul__(self, tf: BaseTimeFrame) -> "BatchTimeFrame":
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
@@ -154,6 +149,7 @@ class BatchTimeFrame(BaseTimeFrame):
             for current_timeframe in self:
                 if timeframe._has_common_ground(current_timeframe):
                     result.append(timeframe * current_timeframe)
+                    # should we break here?
         return BatchTimeFrame(result)
 
     def __sub__(self, tf: BaseTimeFrame) -> "BatchTimeFrame":
@@ -165,18 +161,12 @@ class BatchTimeFrame(BaseTimeFrame):
         else:
             candidates = tf
 
-        result = []
+        result = list(self)
 
-        for current_timeframe in self:
-            partial_result = copy(current_timeframe)
-            for timeframe in candidates:
-                if current_timeframe._has_common_ground(timeframe):
-                    partial_result -= timeframe
-
-            if isinstance(partial_result, BatchTimeFrame):
-                result.extend(partial_result)
-            else:
-                result.append(partial_result)
+        for candidate in candidates:
+            for index, current_timeframe in enumerate(result):
+                if candidate._has_common_ground(current_timeframe):
+                    result[index] = current_timeframe - candidate
 
         return BatchTimeFrame(result)
 
