@@ -7,7 +7,7 @@ from timeframe import BatchTimeFrame, TimeFrame
 
 
 # ======================= Initialization ============================
-def test_batch_timeframe_initialze_successfully():
+def test_batch_timeframe_initialize_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
     tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
@@ -19,7 +19,19 @@ def test_batch_timeframe_initialze_successfully():
     assert btf.len_timeframes == len(tf_list)
 
 
-def test_batch_timeframe_initialze_with_duplicate_timeframes_successfully():
+def test_batch_timeframe_initialize_with_negligible_difference_combines_them():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 17, 11), datetime(2021, 1, 17, 12))
+    tf3 = TimeFrame(datetime(2021, 1, 17, 13), datetime(2021, 1, 17, 20))
+
+    tf_list = [tf1, tf2, tf3]
+
+    btf = BatchTimeFrame(tf_list)
+    assert btf.duration == sum(tf.duration for tf in tf_list)
+    assert btf.len_timeframes == 2
+
+
+def test_batch_timeframe_initialize_with_duplicate_timeframes_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
     tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
@@ -34,7 +46,7 @@ def test_batch_timeframe_initialze_with_duplicate_timeframes_successfully():
     assert btf.len_timeframes == len(unique_tfs)
 
 
-def test_batch_timeframe_initialze_wrong_type_raises_type_error():
+def test_batch_timeframe_initialize_wrong_type_raises_type_error():
     with pytest.raises(TypeError):
         BatchTimeFrame(1)
 
@@ -51,13 +63,13 @@ def test_batch_timeframe_initialze_wrong_type_raises_type_error():
         BatchTimeFrame([TimeFrame(datetime(2021, 1, 17), datetime(2021, 1, 18)), 1])
 
 
-def test_batch_timeframe_initialze_empty_list_is_find_as_well():
+def test_batch_timeframe_initialize_empty_list_is_find_as_well():
     btf = BatchTimeFrame([])
 
     assert btf.duration == 0
 
 
-def test_batch_timeframe_initialze_with_overlapped_elements_prunes_extras():
+def test_batch_timeframe_initialize_with_overlapped_elements_prunes_extras():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
     tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
@@ -444,3 +456,50 @@ def test_batch_timeframe_substract_from_non_base_timeframe_raises_type_error():
 
     with pytest.raises(TypeError):
         btf - [1, 1.0, "dummy", True]
+
+
+# ======================= Equality ============================
+def test_batch_timeframe_equals_another_identical_batch_timeframe():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 20, 10, 30), datetime(2021, 1, 20, 10, 40))
+
+    tf_list1 = [tf1, tf2, tf3]
+    tf_list2 = [tf4, tf5]
+
+    btf1 = BatchTimeFrame(tf_list1)
+    btf2 = BatchTimeFrame(tf_list1)
+    btf3 = BatchTimeFrame(tf_list2)
+
+    assert btf1 == btf2 and btf2 == btf1
+    assert btf1 != btf3 and btf2 != btf3
+
+
+def test_batch_timeframe_equality_with_non_batch_timeframe_raises_type_error():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf = BatchTimeFrame(tf_list1)
+
+    with pytest.raises(TypeError):
+        btf == 1
+
+    with pytest.raises(TypeError):
+        btf == 1.0
+
+    with pytest.raises(TypeError):
+        btf == "dummy"
+
+    with pytest.raises(TypeError):
+        btf == []
+
+    with pytest.raises(TypeError):
+        btf == True  # noqa: E712
+
+    with pytest.raises(TypeError):
+        btf == [1, 1.0, "dummy", True]
