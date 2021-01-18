@@ -1,5 +1,4 @@
 import abc
-from copy import copy
 from datetime import datetime, timedelta
 from functools import reduce
 from typing import Iterable, Union
@@ -49,7 +48,15 @@ class BatchTimeFrame(BaseTimeFrame):
         ):
             self._extend(assertion)
 
-    # TODO: implement __eq__
+    def __eq__(self, btf: "BatchTimeFrame") -> bool:
+        if not isinstance(btf, BatchTimeFrame):
+            raise TypeError(f"{btf} should be a BatchTimeFrame")
+
+        # the first condition is to short circuit and avoid wasting CPU cycles
+        return self.len_timeframes == btf.len_timeframes and all(
+            current_timeframe == candidate
+            for current_timeframe, candidate in zip(self, btf)
+        )
 
     @staticmethod
     def _is_timeframe_or_empty(obj) -> bool:
@@ -70,7 +77,9 @@ class BatchTimeFrame(BaseTimeFrame):
     def _extend(self, tf: "TimeFrame"):
         # TODO: There might be a better solution to reduce the time complexity
         for index, current_timeframe in enumerate(self):
-            if current_timeframe._has_common_ground(tf):
+            if current_timeframe._has_common_ground(
+                tf
+            ) or current_timeframe._has_negligible_difference(tf):
                 last_tf = self.time_frames.pop(index)
                 # to avoid overlapped elements, every new extension should be
                 # compared to our current elements, so that we can reextend if
@@ -216,6 +225,7 @@ class TimeFrame(BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
         if isinstance(tf, _Empty):
+            # this is debatable
             return False
 
         if isinstance(tf, BatchTimeFrame):
@@ -224,9 +234,6 @@ class TimeFrame(BaseTimeFrame):
         return self.end > tf.start
 
     def __ge__(self, tf: BaseTimeFrame) -> bool:
-        if not isinstance(tf, BaseTimeFrame):
-            raise TypeError(f"{tf} should be a BaseTimeFrame")
-
         if isinstance(tf, _Empty):
             return False
 
@@ -248,12 +255,11 @@ class TimeFrame(BaseTimeFrame):
         return self.start == tf.start and self.end == tf.end
 
     def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
-        if not isinstance(tf, BaseTimeFrame):
-            raise TypeError(f"{tf} should be a BaseTimeFrame")
 
         if isinstance(tf, _Empty):
             return False
 
+        # this piece of code might be redundant
         if isinstance(tf, BatchTimeFrame):
             return all(map(self._has_common_ground, tf)) if list(tf) else False
 
@@ -273,16 +279,16 @@ class TimeFrame(BaseTimeFrame):
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
-        if not self._has_common_ground(tf):
-            return _Empty()
-
         if isinstance(tf, TimeFrame):
+            if not self._has_common_ground(tf):
+                return _Empty()
+
             start = max(self.start, tf.start)
             end = min(self.end, tf.end)
             return TimeFrame(start, end)
 
         # isinstance(tf, BatchTimeFrame)
-        return BatchTimeFrame(map(self.__mul__, tf))
+        return BatchTimeFrame(list(map(self.__mul__, tf)))
 
     def __add__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
         """Return the summation of two timeframes"""
@@ -329,7 +335,7 @@ class TimeFrame(BaseTimeFrame):
         if isinstance(self, BatchTimeFrame):
             return self - tf
 
-        if tf.includes(self):
+        if tf.includes(self) or self == tf:
             return _Empty()
         elif self.includes(tf):
             first_upper = tf.start - timedelta(microseconds=1)
