@@ -6,6 +6,7 @@ import pytest
 from timeframe import BatchTimeFrame, TimeFrame
 
 
+# ======================= Initialization ============================
 def test_batch_timeframe_initialze_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
@@ -62,12 +63,11 @@ def test_batch_timeframe_initialze_with_overlapped_elements_prunes_extras():
     tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
     tf4 = TimeFrame(datetime(2021, 1, 17, 10, 30), datetime(2021, 1, 17, 13))
     tf5 = TimeFrame(datetime(2021, 1, 17, 14, 30), datetime(2021, 1, 17, 14, 40))
-    TimeFrame(datetime(2021, 1, 17, 14, 50), datetime(2021, 1, 17, 17))
+    tf6 = TimeFrame(datetime(2021, 1, 17, 14, 50), datetime(2021, 1, 17, 17))
     tf7 = TimeFrame(datetime(2021, 1, 17, 14, 35), datetime(2021, 1, 17, 18, 30))
 
-    tf_list = [tf1, tf2, tf3, tf4, tf5, tf5, tf7]
+    tf_list = [tf1, tf2, tf3, tf4, tf5, tf5, tf6, tf7]
 
-    # union = reduce(lambda x, y: x + y, tf_list[1:], tf_list[0])
     union = reduce(lambda x, y: x + y, tf_list)
     expected_len = 2  # calculated manually
 
@@ -77,6 +77,7 @@ def test_batch_timeframe_initialze_with_overlapped_elements_prunes_extras():
     assert btf.len_timeframes == expected_len
 
 
+# ======================= Inclusion ============================
 def test_batch_timeframe_includes_another_batch_timeframe_with_overlap():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
@@ -165,3 +166,281 @@ def test_batch_timeframe_includes_with_wrong_type_raises_error():
 
     with pytest.raises(TypeError):
         btf.includes([1, 1.0, "dummy"])
+
+
+# ======================= Summation ============================
+def test_batch_timeframe_add_two_instances_successfully():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 20, 10, 30), datetime(2021, 1, 20, 10, 40))
+
+    tf_list1 = [tf1, tf2, tf3]
+    tf_list2 = [tf4, tf5]
+
+    btf1 = BatchTimeFrame(tf_list1)
+    btf2 = BatchTimeFrame(tf_list2)
+
+    btf3 = btf1 + btf2
+
+    assert btf3.len_timeframes == 2  # calculated manually
+    assert btf3.duration == btf2.duration  # again, calculated manually
+
+
+def test_batch_timeframe_add_with_timeframe_successfully():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 20, 10, 30), datetime(2021, 1, 20, 10, 40))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf1 = BatchTimeFrame(tf_list1)
+
+    btf2 = btf1 + tf4
+
+    assert btf2.len_timeframes == 1  # calculated manually
+    assert btf2.duration == tf4.duration  # again, calculated manually
+
+    btf2 += tf5
+
+    assert btf2.len_timeframes == 2  # dah! calculated manually
+    assert btf2.duration == (tf4 + tf5).duration  # seriously dude?
+
+
+def test_batch_timeframe_add_empty_timeframe_results_in_the_same_object():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 20, 10, 30), datetime(2021, 1, 20, 10, 40))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf1 = BatchTimeFrame(tf_list1)
+
+    btf2 = btf1 + (tf4 * tf5)  # the multiplication is an empty timeframe
+
+    assert btf2.len_timeframes == btf1.len_timeframes
+    assert btf2.duration == btf1.duration
+
+    btf2 += tf1 * tf5  # another empty timeframe
+
+    assert btf2.len_timeframes == btf1.len_timeframes
+    assert btf2.duration == btf1.duration
+
+
+def test_batch_timeframe_add_with_non_base_timeframe_raises_type_error():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf = BatchTimeFrame(tf_list1)
+
+    with pytest.raises(TypeError):
+        btf + 1
+
+    with pytest.raises(TypeError):
+        btf + 1.0
+
+    with pytest.raises(TypeError):
+        btf + "dummy"
+
+    with pytest.raises(TypeError):
+        btf + []
+
+    with pytest.raises(TypeError):
+        btf + True
+
+    with pytest.raises(TypeError):
+        btf + [1, 1.0, "dummy", True]
+
+
+# ======================= Multiplication ============================
+def test_batch_timeframe_muliply_two_instances_successfully():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 20, 10, 30), datetime(2021, 1, 20, 10, 40))
+
+    tf_list1 = [tf1, tf2, tf3]
+    tf_list2 = [tf4, tf5]
+
+    btf1 = BatchTimeFrame(tf_list1)
+    btf2 = BatchTimeFrame(tf_list2)
+
+    btf3 = btf1 * btf2
+
+    assert btf3.len_timeframes == 3
+    assert btf3.duration == (tf1 + tf2 + tf3).duration
+
+
+def test_batch_timeframe_multiply_with_timeframe_successfully():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 20, 10, 30), datetime(2021, 1, 20, 10, 40))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf1 = BatchTimeFrame(tf_list1)
+
+    btf2 = btf1 * tf4
+
+    assert btf2.len_timeframes == 3
+    assert btf2.duration == (tf1 + tf2 + tf3).duration
+
+    btf2 *= tf5
+
+    assert btf2.len_timeframes == 0
+    assert btf2.duration == 0
+
+
+def test_batch_timeframe_multiply_with_empty_timeframe_results_in_empty_timeframe():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 20, 10, 30), datetime(2021, 1, 20, 10, 40))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf1 = BatchTimeFrame(tf_list1)
+
+    btf2 = btf1 * (tf4 * tf5)  # the multiplication is an empty timeframe
+
+    assert btf2.len_timeframes == 0
+    assert btf2.duration == 0
+
+    btf2 += tf1 * tf5  # another empty timeframe
+
+    assert btf2.len_timeframes == 0
+    assert btf2.duration == 0
+
+
+def test_batch_timeframe_multiply_with_non_base_timeframe_raises_type_error():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf = BatchTimeFrame(tf_list1)
+
+    with pytest.raises(TypeError):
+        btf * 1
+
+    with pytest.raises(TypeError):
+        btf * 1.0
+
+    with pytest.raises(TypeError):
+        btf * "dummy"
+
+    with pytest.raises(TypeError):
+        btf * []
+
+    with pytest.raises(TypeError):
+        btf * True
+
+    with pytest.raises(TypeError):
+        btf * [1, 1.0, "dummy", True]
+
+
+# ======================= Substraction ============================
+def test_batch_timeframe_substract_two_instances_successfully():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 20, 10, 30), datetime(2021, 1, 20, 10, 40))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf1 = BatchTimeFrame(tf_list1)
+    btf2 = btf1 - BatchTimeFrame([tf4, tf5])
+
+    assert btf2.len_timeframes == 0
+    assert btf2.duration == 0
+
+    btf2 = btf1 - BatchTimeFrame([tf5])
+
+    assert btf2.len_timeframes == 3
+    assert btf2.duration == btf1.duration
+
+
+def test_batch_timeframe_substract_with_timeframe_successfully():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 18, 10, 30), datetime(2021, 1, 18, 12, 30))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf1 = BatchTimeFrame(tf_list1)
+
+    btf2 = btf1 - tf4
+
+    assert btf2.len_timeframes == 0
+    assert btf2.duration == 0
+
+    btf2 = btf1 - tf5
+
+    assert btf2.len_timeframes == 3
+    assert btf2.duration == (tf1 + tf2 + tf3 - tf5).duration
+
+
+def test_batch_timeframe_substract_from_empty_timeframe_results_in_the_same_object():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+    tf4 = TimeFrame(datetime(2021, 1, 18), datetime(2021, 1, 19))
+    tf5 = TimeFrame(datetime(2021, 1, 20, 10, 30), datetime(2021, 1, 20, 10, 40))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf1 = BatchTimeFrame(tf_list1)
+
+    btf2 = btf1 - (tf4 * tf5)
+
+    assert btf2.len_timeframes == btf1.len_timeframes
+    assert btf2.duration == btf1.duration
+
+    btf2 += tf1 * tf5  # another empty timeframe
+
+    assert btf2.len_timeframes == btf1.len_timeframes
+    assert btf2.duration == btf1.duration
+
+
+def test_batch_timeframe_substract_from_non_base_timeframe_raises_type_error():
+    tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf = BatchTimeFrame(tf_list1)
+
+    with pytest.raises(TypeError):
+        btf - 1
+
+    with pytest.raises(TypeError):
+        btf - 1.0
+
+    with pytest.raises(TypeError):
+        btf - "dummy"
+
+    with pytest.raises(TypeError):
+        btf - []
+
+    with pytest.raises(TypeError):
+        btf - True
+
+    with pytest.raises(TypeError):
+        btf - [1, 1.0, "dummy", True]
