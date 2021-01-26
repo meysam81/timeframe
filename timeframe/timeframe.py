@@ -231,7 +231,7 @@ class TimeFrame(BaseTimeFrame):
         if isinstance(tf, BatchTimeFrame):
             return all(map(self.__gt__, tf))
 
-        return self.end > tf.start
+        return self.start > tf.end
 
     def __ge__(self, tf: BaseTimeFrame) -> bool:
         if isinstance(tf, _Empty):
@@ -312,7 +312,7 @@ class TimeFrame(BaseTimeFrame):
             return TimeFrame(start, end)
 
         if self._has_negligible_difference(tf):
-            if self < tf:
+            if self.end == tf.start:
                 return TimeFrame(self.start, tf.end)
             return TimeFrame(tf.start, self.end)
 
