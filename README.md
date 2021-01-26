@@ -9,6 +9,15 @@ This package makes the following calculations on `datetime`:
 an empty one, depending on the two time frames.
 * Substracting two time frames, resuling in one or several time frames.
 
+## Install
+
+Installing the package is as simple as running the following command inside
+your terminal:
+
+```bash
+pip install timeframe
+```
+
 ## Examples
 
 **NOTE**: You can always take a look at the test cases in the [tests](./test)
