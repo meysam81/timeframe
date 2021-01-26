@@ -108,8 +108,10 @@ def test_timeframe_duration_calculation_is_correct():
 def test_timeframe_greater_than_comparison_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 15), datetime(2021, 1, 16))
     tf2 = TimeFrame(datetime(2021, 1, 17), datetime(2021, 1, 18))
+    tf3 = TimeFrame(datetime(2021, 1, 15, 1, 30), datetime(2021, 1, 15, 1, 40))
 
     assert tf2 > tf1
+    assert not tf1 > tf3
 
 
 def test_timeframe_greater_than_is_false_with_emtpy_timeframe():
@@ -186,6 +188,7 @@ def test_timeframe_greater_equal_comparison_successfully():
     tf2 = TimeFrame(datetime(2021, 1, 16), datetime(2021, 1, 18))
 
     assert tf2 >= tf1
+    assert not tf2 > tf1
 
 
 def test_timeframe_compare_equal_correctly():
