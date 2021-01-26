@@ -9,7 +9,7 @@ This package makes the following calculations on `datetime`:
 an empty one, depending on the two time frames.
 * Substracting two time frames, resuling in one or several time frames.
 
-## Example
+## Examples
 
 **NOTE**: You can always take a look at the test cases in the [tests](./test)
 directory to get a sense of how to use the package, but consider the below
@@ -180,3 +180,13 @@ tf2 - tf3
 (tf2 - tf3) == tf2
 # output: True
 ```
+
+## Acknowledgment
+
+Thank you for showing interest in this package. Feel free to contact me if you
+feel like it. 🥂
+
+## Contribution
+
+Any contribution of any size is greatly appreciated. Feel free to open a PR or
+issue in the github page at any time. 🤗
