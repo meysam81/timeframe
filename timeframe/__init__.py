@@ -6,6 +6,6 @@ __all__ = (
 )
 
 __name__ = "timeframe"
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 __author__ = "Meysam Azad"
 __author_email__ = "MeysamAzad81@gmail.com"
