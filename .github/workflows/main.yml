@@ -10,7 +10,7 @@ jobs:
         python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -31,6 +31,10 @@ jobs:
       - name: Test with tox
         run: |
           tox -e py${{ matrix.python-version }}
+      - name: Code coverage-reporter
+        uses: tj-actions/coverage-reporter@v3
+        with:
+          coverage-command: 'python -m coverage report'
       - name: Build package
         run: python setup.py bdist_wheel
       - name: Publish package
