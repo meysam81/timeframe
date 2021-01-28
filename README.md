@@ -1,5 +1,8 @@
 # TimeFrame
 
+![Python package](https://github.com/meysam81/timeframe/workflows/Python%20package/badge.svg)
+[![codecov](https://codecov.io/gh/meysam81/timeframe/branch/main/graph/badge.svg?token=NM0LMWP0X2)](https://codecov.io/gh/meysam81/timeframe)
+
 ## Introduction
 
 This package makes the following calculations on `datetime`:
