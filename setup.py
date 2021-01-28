@@ -19,6 +19,7 @@ setuptools.setup(
     classifiers=[
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
+        "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
@@ -26,5 +27,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    python_requires=">=3.6",
+    package_data={
+        "README": ["README.md"],
+    },
+    keywords="datetime timeframe time-frame",
+    python_requires=">=3.6, <4",
 )
