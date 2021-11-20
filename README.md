@@ -193,6 +193,23 @@ tf2 - tf3
 # output: True
 ```
 
+### Shift
+
+You can shift a timeframe by a given timedelta.
+
+```python
+td1 = datetime.timedelta(minutes=30)
+tf1.shift(td1)
+# output: 2021-01-26T19:30:00#2021-01-26T20:30:00
+```
+
+With `inplace=True` the timeframe will be shifted inplace.
+
+```python
+tf1.shift(td1, inplace=True)
+# output: None
+```
+
 ## Acknowledgment
 
 Thank you for showing interest in this package. Feel free to contact me if you
