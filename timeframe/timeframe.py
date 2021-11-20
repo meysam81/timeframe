@@ -357,6 +357,16 @@ class TimeFrame(BaseTimeFrame):
                 upper = self.end
 
             return TimeFrame(lower, upper)
+        
+    def shift(self, timedelta, inplace=False):
+        start = self.start + timedelta
+        end = self.end + timedelta
+        if inplace:
+            self.start = start
+            self.end = end
+            return None
+        else:
+            return TimeFrame(start, end)
 
     def __repr__(self) -> str:
         return f"{self.start.isoformat()}#{self.end.isoformat()}"
