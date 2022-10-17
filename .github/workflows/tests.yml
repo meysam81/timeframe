@@ -19,9 +19,9 @@ jobs:
       - name: Prepare
         run: |
           pip install -U pip tox
-      - name: Run tests python ${{ matrix.python-version }}
+      - name: Run tests ${{ matrix.python-version }}
         run: |
-          tox -e py${{ matrix.python-version }}
+          tox -e ${{ matrix.python-version }}
       - name: Coverage Report
         uses: codecov/codecov-action@v3
         with:
@@ -30,8 +30,8 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.6"
-          - "3.7"
-          - "3.8"
-          - "3.9"
-          - "3.10"
+          - py3.6
+          - py3.7
+          - py3.8
+          - py3.9
+          - py3.10
