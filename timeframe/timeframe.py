@@ -7,15 +7,15 @@ from typing import Iterable, Union
 class BaseTimeFrame(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
-    def duration(self) -> float:
+    def duration(self) -> float:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def _has_common_ground(self, tf: "BaseTimeFrame") -> bool:
+    def _has_common_ground(self, tf: "BaseTimeFrame") -> bool:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def includes(self, tf: "BaseTimeFrame") -> bool:
+    def includes(self, tf: "BaseTimeFrame") -> bool:  # pragma: no cover
         pass
 
 
@@ -110,27 +110,7 @@ class BatchTimeFrame(BaseTimeFrame):
 
         return False
 
-    # the below method is probably not gonna be used and we might be better off
-    # just deleting it
-    def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
-        if not isinstance(tf, BaseTimeFrame):
-            raise TypeError(f"{tf} should be a BaseTimeFrame")
-
-        if isinstance(tf, _Empty):
-            return False
-
-        if isinstance(tf, BatchTimeFrame):
-            for assertion in tf:
-                for current_timeframe in self:
-                    if current_timeframe._has_common_ground(assertion):
-                        return True
-            return False
-
-        # isinstance(tf, BaseTimeFrame)
-        for current_timeframe in self:
-            if current_timeframe._has_common_ground(tf):
-                return True
-
+    def _has_common_ground(self, _: BaseTimeFrame) -> bool:  # pragma: no cover
         return False
 
     def __add__(self, tf: BaseTimeFrame) -> "BatchTimeFrame":
@@ -158,7 +138,7 @@ class BatchTimeFrame(BaseTimeFrame):
             for current_timeframe in self:
                 if timeframe._has_common_ground(current_timeframe):
                     result.append(timeframe * current_timeframe)
-                    # should we break here?
+                    # TODO: should we break here?
         return BatchTimeFrame(result)
 
     def __sub__(self, tf: BaseTimeFrame) -> "BatchTimeFrame":
@@ -259,10 +239,6 @@ class TimeFrame(BaseTimeFrame):
         if isinstance(tf, _Empty):
             return False
 
-        # this piece of code might be redundant
-        if isinstance(tf, BatchTimeFrame):
-            return all(map(self._has_common_ground, tf)) if list(tf) else False
-
         return (
             self.start < tf.start < self.end
             or self.start < tf.end < self.end
@@ -293,10 +269,6 @@ class TimeFrame(BaseTimeFrame):
     def __add__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
         """Return the summation of two timeframes"""
 
-        # This is because of the way `reduce` works when no initial value is set
-        if isinstance(tf, int) and tf == 0:
-            return self
-
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
@@ -325,15 +297,6 @@ class TimeFrame(BaseTimeFrame):
 
         if isinstance(tf, BatchTimeFrame):
             return reduce(TimeFrame.__sub__, tf, self)
-
-        # the line below is because of the `reduce` above which passes the
-        # result to the next invokation; to make it clear, let's assume that a
-        # list of timeframes has to be substracted from either an individual
-        # timeframe, which starts from the next `if` section, or from a list
-        # of timeframes, which is done in the previous `if` section
-        # TODO: we might not need the line below 🧐
-        if isinstance(self, BatchTimeFrame):
-            return self - tf
 
         if tf.includes(self) or self == tf:
             return _Empty()
