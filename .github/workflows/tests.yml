@@ -1,0 +1,37 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Prepare
+        run: |
+          pip install -U pip tox
+      - name: Run tests ${{ matrix.python-version }}
+        run: |
+          tox -e ${{ matrix.python-version }}
+      - name: Coverage Report
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          verbose: true
+    strategy:
+      matrix:
+        python-version:
+          - py3.6
+          - py3.7
+          - py3.8
+          - py3.9
+          - py3.10

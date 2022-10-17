@@ -503,3 +503,28 @@ def test_batch_timeframe_equality_with_non_batch_timeframe_raises_type_error():
 
     with pytest.raises(TypeError):
         btf == [1, 1.0, "dummy", True]
+
+
+# ======================= Repr ============================
+def test_batch_timeframe_single_timeframe_repr():
+    btf = BatchTimeFrame(
+        [TimeFrame(datetime(2022, 10, 18, 10), datetime(2022, 10, 18, 11))]
+    )
+
+    assert repr(btf) == "2022-10-18T10:00:00#2022-10-18T11:00:00"
+
+
+def test_batch_timeframe_multiple_timeframes_repr():
+    btf = BatchTimeFrame(
+        [
+            TimeFrame(datetime(2022, 10, 18, 10), datetime(2022, 10, 18, 11)),
+            TimeFrame(datetime(2022, 10, 18, 12), datetime(2022, 10, 18, 14)),
+            TimeFrame(datetime(2022, 10, 18, 18), datetime(2022, 10, 18, 20)),
+        ]
+    )
+
+    assert repr(
+        btf
+    ) == "2022-10-18T10:00:00#2022-10-18T11:00:00,2022-10-18T12:00:00#2022-10-18T14:00:00,2022-10-18T18:00:00#2022-10-18T20:00:00".replace(
+        ",", "\n"
+    )

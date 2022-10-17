@@ -15,3 +15,10 @@ def test_empty_timeframe_doesnt_include_anything():
     assert not (tf1 * tf3).includes(tf3)
     assert not (tf1 * tf3).includes(tf4)
     assert not (tf1 * tf2).includes(tf5)
+
+
+def test_empty_timeframe_repr():
+    tf1 = TimeFrame(datetime(2022, 10, 15), datetime(2022, 10, 16))
+    tf2 = TimeFrame(datetime(2022, 10, 17), datetime(2022, 10, 18))
+
+    assert repr(tf1 * tf2) == "Empty TimeFrame"

@@ -1,0 +1,30 @@
+name: linter
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Prepare
+        run: |
+          pip install -U pip pre-commit
+      - name: Run linter
+        run: |
+          pre-commit run -a
+      - if: failure()
+        name: Commit linting changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "chore: lint 🚨"
+          new_branch: ${{ github.head_ref || github.ref_name }}
