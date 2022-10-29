@@ -3,7 +3,12 @@
 [![linter](https://github.com/meysam81/timeframe/actions/workflows/linter.yml/badge.svg?branch=main&event=push)](https://github.com/meysam81/timeframe/actions/workflows/linter.yml)
 [![tests](https://github.com/meysam81/timeframe/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/meysam81/timeframe/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/meysam81/timeframe/branch/main/graph/badge.svg?token=NM0LMWP0X2)](https://codecov.io/gh/meysam81/timeframe)
-
+![License](https://img.shields.io/github/license/meysam81/timeframe)
+![Open Issues](https://img.shields.io/github/issues-raw/meysam81/timeframe)
+![Open PRs](https://img.shields.io/github/issues-pr-raw/meysam81/timeframe)
+![Contributors](https://img.shields.io/github/contributors/meysam81/timeframe)
+![Version](https://img.shields.io/pypi/v/timeframe)
+![Downloads](https://img.shields.io/pypi/dm/timeframe)
 ## Introduction
 
 This package makes the following calculations on `datetime`:
