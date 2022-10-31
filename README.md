@@ -9,6 +9,9 @@
 ![Contributors](https://img.shields.io/github/contributors/meysam81/timeframe)
 ![Version](https://img.shields.io/pypi/v/timeframe)
 ![Downloads](https://img.shields.io/pypi/dm/timeframe)
+![Python](https://img.shields.io/pypi/pyversions/timeframe)
+![Wheel](https://img.shields.io/pypi/wheel/timeframe)
+
 ## Introduction
 
 This package makes the following calculations on `datetime`:
