@@ -95,6 +95,10 @@ class BatchTimeFrame(BaseTimeFrame):
 
     @property
     def len_timeframes(self):
+        warnings.warn(
+            "len_timeframes is deprecated, use len(self.time_frames) instead",
+            DeprecationWarning,
+        )
         return len(self.time_frames)
 
     @property
@@ -300,9 +304,10 @@ class TimeFrame(BaseTimeFrame):
         return self.start == tf.start and self.end == tf.end
 
     def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
-
-        if isinstance(tf, _Empty):
-            return False
+        warnings.warn(
+            "_has_common_ground is deprecated, use `in` keyword instead",
+            DeprecationWarning,
+        )
 
         return (
             self.start < tf.start < self.end
