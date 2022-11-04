@@ -437,6 +437,41 @@ def test_batch_timeframe_subtract_two_instances_successfully():
     assert btf2.duration == btf1.duration
 
 
+@pytest.mark.skip(reason="Not implemented yet")
+def test_batch_timeframe_subtract_superset_from_subset():
+    tf_long = TimeFrame(datetime(2022, 3, 1, 12), datetime(2022, 3, 1, 13))
+    tf_a = BatchTimeFrame([tf_long])
+
+    tf_sub_a = TimeFrame(datetime(2022, 3, 1, 12, 30), datetime(2022, 3, 1, 12, 45))
+    tf_b = BatchTimeFrame([tf_sub_a])
+
+    result = tf_a - tf_b
+
+    assert result == BatchTimeFrame(
+        [
+            TimeFrame(datetime(2022, 3, 1, 12), datetime(2022, 3, 1, 12, 30))
+            - timedelta(microseconds=1),
+            TimeFrame(
+                datetime(2022, 3, 1, 12, 45) + timedelta(microseconds=1),
+                datetime(2022, 3, 1, 13),
+            ),
+        ]
+    )
+
+
+def test_batch_timeframe_subtracted_from_batch_timeframe_raise_not_implemented_error():
+    tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
+    tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
+    tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
+
+    tf_list1 = [tf1, tf2, tf3]
+
+    btf1 = BatchTimeFrame(tf_list1)
+
+    with pytest.raises(NotImplementedError):
+        btf1 - btf1
+
+
 def test_batch_timeframe_subtract_with_timeframe_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
     tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))

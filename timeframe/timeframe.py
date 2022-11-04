@@ -190,19 +190,15 @@ class BatchTimeFrame(BaseTimeFrame):
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
-        if not isinstance(tf, BatchTimeFrame):
-            candidates = [tf]
-        else:
-            candidates = tf
+        if isinstance(tf, TimeFrame):
+            return BatchTimeFrame(
+                [current_timeframe - tf for current_timeframe in self]
+            )
 
-        result = list(self)
+        if isinstance(tf, _Empty):
+            return self
 
-        for candidate in candidates:
-            for index, current_timeframe in enumerate(result):
-                if candidate._has_common_ground(current_timeframe):
-                    result[index] = current_timeframe - candidate
-
-        return BatchTimeFrame(result)
+        raise NotImplementedError("BatchTimeFrame is not supported for subtraction!")
 
     def __repr__(self) -> str:
         return "\n".join(str(tf) for tf in list(self))
