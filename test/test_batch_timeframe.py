@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import reduce
 
 import pytest
@@ -116,7 +116,7 @@ def test_batch_timeframe_yells_at_non_base_timeframe_for_inclusion_check(
 def test_batch_timeframe_yells_at_inclusion_check_for_batch_timeframe(
     random_batch_timeframes, random_timeframe
 ):
-    with pytest.raises(ValueError):
+    with pytest.raises(NotImplementedError):
         BatchTimeFrame([random_timeframe]) in random_batch_timeframes
 
 
@@ -416,6 +416,7 @@ def test_batch_timeframe_multiply_with_non_base_timeframe_raises_type_error():
 
 
 # ======================= Substraction ============================
+@pytest.mark.skip(reason="Not implemented yet")
 def test_batch_timeframe_subtract_two_instances_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
     tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
@@ -428,8 +429,8 @@ def test_batch_timeframe_subtract_two_instances_successfully():
     btf1 = BatchTimeFrame(tf_list1)
     btf2 = btf1 - BatchTimeFrame([tf4, tf5])
 
-    assert btf2.len_timeframes == 0
-    assert btf2.duration == 0
+    assert btf2 == BatchTimeFrame([])
+    assert len(btf2) == 0
 
     btf2 = btf1 - BatchTimeFrame([tf5])
 
@@ -485,12 +486,24 @@ def test_batch_timeframe_subtract_with_timeframe_successfully():
 
     btf2 = btf1 - tf4
 
-    assert btf2.len_timeframes == 0
-    assert btf2.duration == 0
+    assert btf2 == BatchTimeFrame([])
+    assert len(btf2) == 0
 
     btf2 = btf1 - tf5
 
-    assert btf2.len_timeframes == 3
+    assert btf2 == BatchTimeFrame(
+        [
+            TimeFrame(
+                datetime(2021, 1, 18, 10),
+                datetime(2021, 1, 18, 10, 30) - timedelta(microseconds=1),
+            ),
+            TimeFrame(
+                datetime(2021, 1, 18, 12, 30) + timedelta(microseconds=1),
+                datetime(2021, 1, 18, 14),
+            ),
+            tf3,
+        ]
+    )
     assert btf2.duration == (tf1 + tf2 + tf3 - tf5).duration
 
 
