@@ -160,7 +160,7 @@ class BatchTimeFrame(BaseTimeFrame):
             return False
 
         # isinstance(tf, BatchTimeFrame)
-        raise ValueError("BatchTimeFrame is not supported for inclusion!")
+        raise NotImplementedError("BatchTimeFrame is not supported for inclusion!")
 
     def _has_common_ground(self, _: BaseTimeFrame) -> bool:  # pragma: no cover
         return False
