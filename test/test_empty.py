@@ -60,3 +60,14 @@ def test_empty_timeframe_get_len_returns_zero():
     )
 
     assert len(columbus_usurped_american_natives * trump_presidency_start) == 0
+
+
+# ======================= Subtraction ============================
+def test_empty_timeframe_subtract_base_timeframe_results_in_empty_timeframe():
+    soviet_collapse_date = TimeFrame(
+        datetime(1991, 12, 26, 10), datetime(1991, 12, 26, 11)
+    )
+    world_peace_day = TimeFrame(datetime(2021, 9, 21, 10), datetime(2021, 9, 21, 11))
+
+    empty_timeframe = soviet_collapse_date * world_peace_day
+    assert isinstance(empty_timeframe - soviet_collapse_date, type(empty_timeframe))

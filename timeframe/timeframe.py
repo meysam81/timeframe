@@ -44,6 +44,9 @@ class _Empty(BaseTimeFrame):
     def __contains__(self, _: BaseTimeFrame):
         return False
 
+    def __sub__(self, _: BaseTimeFrame):
+        return self
+
     @property
     def duration(self) -> float:
         warnings.warn("duration is deprecated, use len() instead", DeprecationWarning)
