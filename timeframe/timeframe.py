@@ -232,6 +232,9 @@ class TimeFrame(BaseTimeFrame):
         if isinstance(tf, TimeFrame):
             return self.start <= tf.start <= tf.end <= self.end
 
+        if isinstance(tf, _Empty):
+            return True  # rather controversial and philosophical!
+
         # isinstance(tf, BatchTimeFrame)
         return all(tf in self for tf in tf)
 
@@ -361,7 +364,7 @@ class TimeFrame(BaseTimeFrame):
         if isinstance(tf, BatchTimeFrame):
             return reduce(TimeFrame.__sub__, tf, self)
 
-        if tf.includes(self) or self == tf:
+        if self in tf:
             return _Empty()
         elif self.includes(tf):
             first_upper = tf.start - timedelta(microseconds=1)

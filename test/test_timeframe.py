@@ -528,3 +528,13 @@ def test_timeframe_substraction_with_non_base_timeframe_raises_type_error():
 
     with pytest.raises(TypeError):
         tf - [1, 1.0, "dummy", True]
+
+
+def test_timeframe_substraction_from_bigger_timeframe_returns_empty():
+    tf1 = TimeFrame(datetime(2022, 2, 22), datetime(2022, 2, 23))
+    tf2 = TimeFrame(datetime(2022, 2, 22), datetime(2022, 2, 24))
+
+    minus_result = tf1 - tf2
+
+    assert len(minus_result) == 0
+    assert "empty" in repr(minus_result).lower()
