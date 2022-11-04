@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pytest
+
 from timeframe import TimeFrame
 
 
@@ -22,3 +24,39 @@ def test_empty_timeframe_repr():
     tf2 = TimeFrame(datetime(2022, 10, 17), datetime(2022, 10, 18))
 
     assert repr(tf1 * tf2) == "Empty TimeFrame"
+
+
+def test_empty_timeframe_include_warns_deprecation(random_timeframe):
+    with pytest.warns(DeprecationWarning):
+        april_fools_day = TimeFrame(datetime(2021, 4, 1, 10), datetime(2021, 4, 1, 11))
+        may_day = TimeFrame(datetime(2021, 5, 1, 10), datetime(2021, 5, 1, 11))
+
+        (april_fools_day * may_day).includes(random_timeframe)
+
+
+@pytest.mark.repeat(7)
+def test_empty_timeframe_inclusion_with_in_keyword(random_timeframe):
+    april_fools_day = TimeFrame(datetime(2021, 4, 1, 10), datetime(2021, 4, 1, 11))
+    may_day = TimeFrame(datetime(2021, 5, 1, 10), datetime(2021, 5, 1, 11))
+
+    assert random_timeframe not in april_fools_day * may_day
+
+
+# ======================= Duration ============================
+def test_empty_timeframe_using_duration_produces_warning():
+    with pytest.warns(DeprecationWarning):
+        iran_usurpation = TimeFrame(datetime(1979, 2, 11, 10), datetime(2022, 11, 30))
+        turkey_armenia_war = TimeFrame(datetime(1920, 9, 24), datetime(1920, 12, 2))
+
+        (iran_usurpation * turkey_armenia_war).duration
+
+
+def test_empty_timeframe_get_len_returns_zero():
+    columbus_usurped_american_natives = TimeFrame(
+        datetime(1492, 10, 12, 10), datetime(1492, 10, 12, 11)
+    )
+    trump_presidency_start = TimeFrame(
+        datetime(2017, 1, 20, 10), datetime(2017, 1, 20, 11)
+    )
+
+    assert len(columbus_usurped_american_natives * trump_presidency_start) == 0

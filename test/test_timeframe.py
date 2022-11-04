@@ -98,10 +98,58 @@ def test_timeframe_never_includes_empty_timeframe():
     assert not tf1.includes(tf3 * tf5)
 
 
+def test_timeframe_include_warns_deprecated():
+    slavery_emancipation_sign_date = TimeFrame(
+        datetime(1863, 1, 1, 10), datetime(1863, 1, 1, 11)
+    )
+    pioneer_10_reaches_jupyter = TimeFrame(
+        datetime(1973, 12, 4, 10), datetime(1973, 12, 4, 11)
+    )
+    with pytest.warns(DeprecationWarning):
+        slavery_emancipation_sign_date.includes(pioneer_10_reaches_jupyter)
+
+
+def test_timeframe_inclusion_with_in_keyword():
+    world_war_1_start = TimeFrame(datetime(1914, 7, 28, 10), datetime(1914, 7, 28, 11))
+    world_war_1_end = TimeFrame(datetime(1918, 11, 11, 10), datetime(1918, 11, 11, 11))
+
+    assert world_war_1_start not in world_war_1_end
+
+
+def test_timeframe_inclusion_non_base_timeframe_yells_type_error(random_timeframe):
+    with pytest.raises(TypeError):
+        1 in random_timeframe
+
+    with pytest.raises(TypeError):
+        1.0 in random_timeframe
+
+    with pytest.raises(TypeError):
+        "dummy" in random_timeframe
+
+
+def test_timeframe_inclusion_check_batch_timeframe_checks_all_timeframes():
+    world_war_1 = TimeFrame(datetime(1914, 7, 28), datetime(1918, 11, 11))
+    world_war_2 = TimeFrame(datetime(1939, 9, 1), datetime(1945, 9, 2))
+    german_invades_paris = TimeFrame(datetime(1940, 6, 4), datetime(1940, 6, 4))
+
+    assert BatchTimeFrame([german_invades_paris]) in world_war_2
+    assert BatchTimeFrame([german_invades_paris]) not in world_war_1
+
+
 # ======================= Duration ============================
 def test_timeframe_duration_calculation_is_correct():
     tf = TimeFrame(datetime(2021, 1, 15, 12), datetime(2021, 1, 15, 13))
     assert tf.duration == 3600.0
+
+
+def test_timeframe_using_duration_produces_warning():
+    with pytest.warns(DeprecationWarning):
+        TimeFrame(datetime(2021, 1, 15, 12), datetime(2021, 1, 15, 13)).duration
+
+
+def test_timeframe_len_produces_substract_of_start_till_end():
+    ides_of_march = TimeFrame(datetime(2021, 3, 15, 10), datetime(2021, 3, 15, 11))
+    assert len(ides_of_march) == 3600.0
 
 
 # ======================= Greater Than ============================

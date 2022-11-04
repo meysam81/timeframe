@@ -89,6 +89,37 @@ def test_batch_timeframe_initialize_with_overlapped_elements_prunes_extras():
     assert btf.len_timeframes == expected_len
 
 
+def test_batch_timeframe_get_items_with_index(random_batch_timeframes):
+    for i, tf in enumerate(random_batch_timeframes):
+        assert tf == random_batch_timeframes[i]
+
+
+def test_batch_timeframe_yells_at_non_base_timeframe_for_inclusion_check(
+    random_batch_timeframes, random_timeframe
+):
+    with pytest.raises(TypeError):
+        1 in random_batch_timeframes
+
+    with pytest.raises(TypeError):
+        1.0 in random_batch_timeframes
+
+    with pytest.raises(TypeError):
+        "dummy" in random_batch_timeframes
+
+    with pytest.raises(TypeError):
+        [1, 1.0, "dummy"] in random_batch_timeframes
+
+    with pytest.raises(TypeError):
+        [random_timeframe] in random_batch_timeframes
+
+
+def test_batch_timeframe_yells_at_inclusion_check_for_batch_timeframe(
+    random_batch_timeframes, random_timeframe
+):
+    with pytest.raises(ValueError):
+        BatchTimeFrame([random_timeframe]) in random_batch_timeframes
+
+
 # ======================= Inclusion ============================
 def test_batch_timeframe_includes_another_batch_timeframe_with_overlap():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
@@ -178,6 +209,26 @@ def test_batch_timeframe_includes_with_wrong_type_raises_error():
 
     with pytest.raises(TypeError):
         btf.includes([1, 1.0, "dummy"])
+
+
+def test_batch_timeframe_includes_warn_deprecation(
+    random_batch_timeframes, random_timeframe
+):
+    with pytest.warns(DeprecationWarning):
+        random_batch_timeframes.includes(random_timeframe)
+
+
+def test_batch_timeframe_inclusion_with_in_keyword(random_batch_timeframes):
+    batch = BatchTimeFrame([TimeFrame(datetime(1706, 1, 16), datetime(1706, 1, 18))])
+    benjamin_franklin_birthday = TimeFrame(
+        datetime(1706, 1, 17, 10), datetime(1706, 1, 17, 11)
+    )
+    apollo_one_three_kills = TimeFrame(
+        datetime(1967, 1, 27, 10), datetime(1969, 1, 27, 11)
+    )
+
+    assert benjamin_franklin_birthday in random_batch_timeframes + batch
+    assert apollo_one_three_kills not in random_batch_timeframes + batch
 
 
 # ======================= Summation ============================
