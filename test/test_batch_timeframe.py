@@ -416,7 +416,7 @@ def test_batch_timeframe_multiply_with_non_base_timeframe_raises_type_error():
 
 
 # ======================= Substraction ============================
-def test_batch_timeframe_substract_two_instances_successfully():
+def test_batch_timeframe_subtract_two_instances_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
     tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
     tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
@@ -437,7 +437,7 @@ def test_batch_timeframe_substract_two_instances_successfully():
     assert btf2.duration == btf1.duration
 
 
-def test_batch_timeframe_substract_with_timeframe_successfully():
+def test_batch_timeframe_subtract_with_timeframe_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
     tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
     tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
@@ -459,7 +459,7 @@ def test_batch_timeframe_substract_with_timeframe_successfully():
     assert btf2.duration == (tf1 + tf2 + tf3 - tf5).duration
 
 
-def test_batch_timeframe_substract_from_empty_timeframe_results_in_the_same_object():
+def test_batch_timeframe_subtract_from_empty_timeframe_results_in_the_same_object():
     tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
     tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
     tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
@@ -481,7 +481,7 @@ def test_batch_timeframe_substract_from_empty_timeframe_results_in_the_same_obje
     assert btf2.duration == btf1.duration
 
 
-def test_batch_timeframe_substract_from_non_base_timeframe_raises_type_error():
+def test_batch_timeframe_subtract_from_non_base_timeframe_raises_type_error():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 17, 12), datetime(2021, 1, 17, 14))
     tf3 = TimeFrame(datetime(2021, 1, 17, 18), datetime(2021, 1, 17, 20))
