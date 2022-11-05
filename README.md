@@ -45,6 +45,17 @@ from timeframe import TimeFrame
 
 ### Inclusion
 
+#### New API
+
+```python
+>>> tf1 = TimeFrame(datetime(2021, 1, 1), datetime(2021, 1, 2))
+>>> tf2 = TimeFrame(datetime(2021, 1, 1, 12), datetime(2021, 1, 1, 13))
+>>> tf2 in tf1
+True
+```
+
+#### Deprecated
+
 This implies whether or not one time frame includes another; it can also be
 used to check if a `datetime` is inside one `TimeFrame`.
 

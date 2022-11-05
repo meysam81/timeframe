@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 
 from timeframe import BatchTimeFrame, TimeFrame
@@ -26,3 +28,10 @@ def faker_seed():
     import time
 
     return time.time()
+
+
+@pytest.fixture
+def empty_timeframe():
+    return TimeFrame(datetime(2022, 1, 1), datetime(2022, 1, 2)) * TimeFrame(
+        datetime(2022, 1, 3), datetime(2022, 1, 4)
+    )

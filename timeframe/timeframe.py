@@ -1,21 +1,30 @@
 import abc
+import warnings
 from datetime import datetime, timedelta
 from functools import reduce
 from typing import Iterable, Union
 
+INCLUDES_DEPRECATION_WARNING = (
+    "includes is deprecated, please use the `in` operator instead"
+)
 
-class BaseTimeFrame(metaclass=abc.ABCMeta):
+
+class BaseTimeFrame(metaclass=abc.ABCMeta):  # pragma: no cover
     @property
     @abc.abstractmethod
-    def duration(self) -> float:  # pragma: no cover
+    def duration(self) -> float:
         pass
 
     @abc.abstractmethod
-    def _has_common_ground(self, tf: "BaseTimeFrame") -> bool:  # pragma: no cover
+    def _has_common_ground(self, tf: "BaseTimeFrame") -> bool:
         pass
 
     @abc.abstractmethod
-    def includes(self, tf: "BaseTimeFrame") -> bool:  # pragma: no cover
+    def includes(self, tf: "BaseTimeFrame") -> bool:
+        pass
+
+    @abc.abstractmethod
+    def __contains__(self, tf: "BaseTimeFrame") -> bool:
         pass
 
 
@@ -23,10 +32,15 @@ class _Empty(BaseTimeFrame):
     def __repr__(self):
         return "Empty TimeFrame"
 
-    def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
+    def _has_common_ground(self, _: BaseTimeFrame) -> bool:
         return False
 
-    def includes(self, tf: BaseTimeFrame) -> bool:
+    def __contains__(self, _: BaseTimeFrame) -> bool:
+        return False
+
+    def includes(self, _: BaseTimeFrame) -> bool:
+        warnings.warn(INCLUDES_DEPRECATION_WARNING, DeprecationWarning)
+
         return False
 
     @property
@@ -90,6 +104,11 @@ class BatchTimeFrame(BaseTimeFrame):
             self.time_frames.append(tf)
 
     def includes(self, tf: BaseTimeFrame) -> bool:
+        warnings.warn(
+            INCLUDES_DEPRECATION_WARNING,
+            DeprecationWarning,
+        )
+
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
@@ -162,6 +181,28 @@ class BatchTimeFrame(BaseTimeFrame):
     def __repr__(self) -> str:
         return "\n".join(str(tf) for tf in list(self))
 
+    def __contains__(self, dt: Union[datetime, "BaseTimeFrame"]) -> bool:
+        if not isinstance(dt, (datetime, BaseTimeFrame)):
+            raise TypeError(f"{dt} should be either a datetime or a BaseTimeFrame")
+
+        if isinstance(dt, datetime):
+            for current_timeframe in self:
+                if dt in current_timeframe:
+                    return True
+            return False
+
+        if isinstance(dt, _Empty):
+            return True  # this is debatable & philosophical rather!
+
+        if isinstance(dt, BatchTimeFrame):
+            return all(map(self.__contains__, dt))
+
+        # isinstance(dt, TimeFrame)
+        for current_timeframe in self:
+            if dt in current_timeframe:
+                return True
+        return False
+
 
 # it might be a good idea to use this across the whole project
 class TimeFrame(BaseTimeFrame):
@@ -181,6 +222,11 @@ class TimeFrame(BaseTimeFrame):
         self.end = end_datetime
 
     def includes(self, dt: Union[datetime, BaseTimeFrame]) -> bool:
+        warnings.warn(
+            INCLUDES_DEPRECATION_WARNING,
+            DeprecationWarning,
+        )
+
         if not isinstance(dt, (datetime, BaseTimeFrame)):
             raise TypeError(f"{dt} should be either a datetime or a BaseTimeFrame")
 
@@ -290,6 +336,23 @@ class TimeFrame(BaseTimeFrame):
 
         return BatchTimeFrame([self, tf])
 
+    def __contains__(self, dt: Union[datetime, "BaseTimeFrame"]) -> bool:
+        """Whether or not the current instance is a superset of the given timeframe"""
+
+        if not isinstance(dt, (datetime, BaseTimeFrame)):
+            raise TypeError(f"{dt} should be either a datetime or a BaseTimeFrame")
+
+        if isinstance(dt, datetime):
+            return self.start <= dt <= self.end
+
+        if isinstance(dt, _Empty):
+            return True  # this is debatable & philosophical rather!
+
+        if isinstance(dt, BatchTimeFrame):
+            return all(map(self.__contains__, dt))
+
+        return self.start <= dt.start <= dt.end <= self.end
+
     def __sub__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
         """Remove the portion of the time specified in tf"""
         if not isinstance(tf, BaseTimeFrame):
@@ -298,7 +361,9 @@ class TimeFrame(BaseTimeFrame):
         if isinstance(tf, BatchTimeFrame):
             return reduce(TimeFrame.__sub__, tf, self)
 
-        if tf.includes(self) or self == tf:
+        if isinstance(tf, _Empty):
+            return self
+        elif self in tf:
             return _Empty()
         elif self.includes(tf):
             first_upper = tf.start - timedelta(microseconds=1)
