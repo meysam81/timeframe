@@ -11,6 +11,8 @@
 [![Downloads](https://img.shields.io/pypi/dm/timeframe)](https://pypi.org/project/timeframe/)
 [![Python](https://img.shields.io/pypi/pyversions/timeframe)](https://pypi.org/project/timeframe/)
 [![Wheel](https://img.shields.io/pypi/wheel/timeframe)](https://pypi.org/project/timeframe/)
+[![Repo Size](https://img.shields.io/github/repo-size/meysam81/timeframe)](https://github.com/meysam81/timeframe/)
+[![Code Size](https://img.shields.io/github/languages/code-size/meysam81/timeframe)](https://github.com/meysam81/timeframe/)
 
 ## Introduction
 
