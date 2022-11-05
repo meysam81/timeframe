@@ -389,8 +389,8 @@ def test_timeframe_add_with_non_batch_timeframe_raises_type_error():
         tf + [1, 1.0, "dummy", True]
 
 
-# ======================= Substraction ============================
-def test_timeframe_sub_without_overlap_gives_accurate_substract():
+# ======================= Subtraction ============================
+def test_timeframe_sub_without_overlap_gives_accurate_subtract():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10))
 
@@ -400,7 +400,7 @@ def test_timeframe_sub_without_overlap_gives_accurate_substract():
     assert assertion.duration == tf1.duration
 
 
-def test_timeframe_sub_with_half_overlap_greater_start_gives_accurate_substract():
+def test_timeframe_sub_with_half_overlap_greater_start_gives_accurate_subtract():
     tf1 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10, 30))
     tf2 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
 
@@ -411,7 +411,7 @@ def test_timeframe_sub_with_half_overlap_greater_start_gives_accurate_substract(
     assert assertion.duration == expected.duration
 
 
-def test_timeframe_sub_with_half_overlap_lower_start_gives_accurate_substract():
+def test_timeframe_sub_with_half_overlap_lower_start_gives_accurate_subtract():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10, 30))
 
@@ -422,7 +422,7 @@ def test_timeframe_sub_with_half_overlap_lower_start_gives_accurate_substract():
     assert assertion.duration == expected.duration
 
 
-def test_timeframe_sub_from_superset_gives_accurate_substract():
+def test_timeframe_sub_from_superset_gives_accurate_subtract():
     tf1 = TimeFrame(datetime(2021, 1, 17, 8), datetime(2021, 1, 17, 12))
     tf2 = TimeFrame(datetime(2021, 1, 17, 7), datetime(2021, 1, 17, 13))
 
@@ -431,7 +431,7 @@ def test_timeframe_sub_from_superset_gives_accurate_substract():
     assert assertion.duration == 0
 
 
-def test_timeframe_substract_from_batch_timeframe_successfully():
+def test_timeframe_subtract_from_batch_timeframe_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
     tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
     tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
@@ -460,7 +460,7 @@ def test_timeframe_sub_from_subset_gives_a_batch_timeframe():
     )
 
 
-def test_timeframe_substraction_with_non_base_timeframe_raises_type_error():
+def test_timeframe_subtraction_with_non_base_timeframe_raises_type_error():
     tf = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
 
     with pytest.raises(TypeError):
@@ -480,3 +480,19 @@ def test_timeframe_substraction_with_non_base_timeframe_raises_type_error():
 
     with pytest.raises(TypeError):
         tf - [1, 1.0, "dummy", True]
+
+
+def test_timeframe_subtraction_from_superset_returns_empty(empty_timeframe):
+    tf1 = TimeFrame(datetime(2022, 2, 22), datetime(2022, 2, 23))
+    tf2 = TimeFrame(datetime(2022, 2, 22), datetime(2022, 2, 24))
+
+    assert tf2 - tf1 == TimeFrame(
+        datetime(2022, 2, 23) + timedelta(microseconds=1), datetime(2022, 2, 24)
+    )
+    assert isinstance(tf1 - tf2, type(empty_timeframe))
+
+
+def test_timeframe_subtraction_from_empty_returns_self(empty_timeframe):
+    tf1 = TimeFrame(datetime(2022, 2, 22), datetime(2022, 2, 23))
+
+    assert tf1 - empty_timeframe is tf1

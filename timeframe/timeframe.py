@@ -162,6 +162,28 @@ class BatchTimeFrame(BaseTimeFrame):
     def __repr__(self) -> str:
         return "\n".join(str(tf) for tf in list(self))
 
+    def __contains__(self, dt: Union[datetime, "BaseTimeFrame"]) -> bool:
+        if not isinstance(dt, (datetime, BaseTimeFrame)):
+            raise TypeError(f"{dt} should be either a datetime or a BaseTimeFrame")
+
+        if isinstance(dt, datetime):
+            for current_timeframe in self:
+                if dt in current_timeframe:
+                    return True
+            return False
+
+        if isinstance(dt, _Empty):
+            return True  # this is debatable & philosophical rather!
+
+        if isinstance(dt, BatchTimeFrame):
+            return all(map(self.__contains__, dt))
+
+        # isinstance(dt, TimeFrame)
+        for current_timeframe in self:
+            if dt in current_timeframe:
+                return True
+        return False
+
 
 # it might be a good idea to use this across the whole project
 class TimeFrame(BaseTimeFrame):
@@ -290,6 +312,23 @@ class TimeFrame(BaseTimeFrame):
 
         return BatchTimeFrame([self, tf])
 
+    def __contains__(self, dt: Union[datetime, "BaseTimeFrame"]) -> bool:
+        """Whether or not the current instance is a superset of the given timeframe"""
+
+        if not isinstance(dt, (datetime, BaseTimeFrame)):
+            raise TypeError(f"{dt} should be either a datetime or a BaseTimeFrame")
+
+        if isinstance(dt, datetime):
+            return self.start <= dt <= self.end
+
+        if isinstance(dt, _Empty):
+            return True  # this is debatable & philosophical rather!
+
+        if isinstance(dt, BatchTimeFrame):
+            return all(map(self.__contains__, dt))
+
+        return self.start <= dt.start <= dt.end <= self.end
+
     def __sub__(self, tf: BaseTimeFrame) -> BaseTimeFrame:
         """Remove the portion of the time specified in tf"""
         if not isinstance(tf, BaseTimeFrame):
@@ -298,7 +337,9 @@ class TimeFrame(BaseTimeFrame):
         if isinstance(tf, BatchTimeFrame):
             return reduce(TimeFrame.__sub__, tf, self)
 
-        if tf.includes(self) or self == tf:
+        if isinstance(tf, _Empty):
+            return self
+        elif self in tf:
             return _Empty()
         elif self.includes(tf):
             first_upper = tf.start - timedelta(microseconds=1)
