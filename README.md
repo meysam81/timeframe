@@ -1,16 +1,16 @@
 # TimeFrame
 
-[![linter](https://github.com/meysam81/timeframe/actions/workflows/linter.yml/badge.svg?branch=main&event=push)](https://github.com/meysam81/timeframe/actions/workflows/linter.yml)
-[![tests](https://github.com/meysam81/timeframe/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/meysam81/timeframe/actions/workflows/tests.yml)
+[![linter](https://github.com/meysam81/timeframe/actions/workflows/linter.yml/badge.svg?branch=main&event=push)](./.pre-commit-config.yaml)
+[![tests](https://github.com/meysam81/timeframe/actions/workflows/tests.yml/badge.svg?branch=main)](./tox.ini)
 [![codecov](https://codecov.io/gh/meysam81/timeframe/branch/main/graph/badge.svg?token=NM0LMWP0X2)](https://codecov.io/gh/meysam81/timeframe)
-![License](https://img.shields.io/github/license/meysam81/timeframe)
-![Open Issues](https://img.shields.io/github/issues-raw/meysam81/timeframe)
-![Open PRs](https://img.shields.io/github/issues-pr-raw/meysam81/timeframe)
-![Contributors](https://img.shields.io/github/contributors/meysam81/timeframe)
-![Version](https://img.shields.io/pypi/v/timeframe)
-![Downloads](https://img.shields.io/pypi/dm/timeframe)
-![Python](https://img.shields.io/pypi/pyversions/timeframe)
-![Wheel](https://img.shields.io/pypi/wheel/timeframe)
+[![License](https://img.shields.io/github/license/meysam81/timeframe)](./LICENSE)
+[![Open Issues](https://img.shields.io/github/issues-raw/meysam81/timeframe)](https://github.com/meysam81/timeframe/issues)
+[![Open PRs](https://img.shields.io/github/issues-pr-raw/meysam81/timeframe)](https://github.com/meysam81/timeframe/pulls)
+[![Contributors](https://img.shields.io/github/contributors/meysam81/timeframe)](https://github.com/meysam81/timeframe/graphs/contributors)
+[![Version](https://img.shields.io/pypi/v/timeframe)](https://pypi.org/project/timeframe/)
+[![Downloads](https://img.shields.io/pypi/dm/timeframe)](https://pypi.org/project/timeframe/)
+[![Python](https://img.shields.io/pypi/pyversions/timeframe)](https://pypi.org/project/timeframe/)
+[![Wheel](https://img.shields.io/pypi/wheel/timeframe)](https://pypi.org/project/timeframe/)
 
 ## Introduction
 
