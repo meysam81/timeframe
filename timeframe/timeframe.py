@@ -1,31 +1,22 @@
 import abc
-import warnings
 from datetime import datetime, timedelta
 from functools import reduce
 from typing import Iterable, Union
 
 
-class BaseTimeFrame(metaclass=abc.ABCMeta):  # pragma: no cover
+class BaseTimeFrame(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
-    def duration(self) -> float:
-        ...
+    def duration(self) -> float:  # pragma: no cover
+        pass
 
     @abc.abstractmethod
-    def _has_common_ground(self, tf: "BaseTimeFrame") -> bool:
-        ...
+    def _has_common_ground(self, tf: "BaseTimeFrame") -> bool:  # pragma: no cover
+        pass
 
     @abc.abstractmethod
-    def includes(self, tf: "BaseTimeFrame") -> bool:
-        ...
-
-    @abc.abstractmethod
-    def __contains__(self, tf: "BaseTimeFrame") -> bool:
-        ...
-
-    @abc.abstractmethod
-    def __len__(self) -> int:
-        ...
+    def includes(self, tf: "BaseTimeFrame") -> bool:  # pragma: no cover
+        pass
 
 
 class _Empty(BaseTimeFrame):
@@ -36,29 +27,14 @@ class _Empty(BaseTimeFrame):
         return False
 
     def includes(self, tf: BaseTimeFrame) -> bool:
-        warnings.warn(
-            "includes is deprecated, use `in` keyword instead", DeprecationWarning
-        )
         return False
-
-    def __contains__(self, _: BaseTimeFrame):
-        return False
-
-    def __sub__(self, _: BaseTimeFrame):
-        return self
 
     @property
     def duration(self) -> float:
-        warnings.warn("duration is deprecated, use len() instead", DeprecationWarning)
         return 0.0
-
-    def __len__(self):
-        return 0
 
 
 class BatchTimeFrame(BaseTimeFrame):
-    __slots__ = ("time_frames",)
-
     def __init__(self, time_frames: Iterable[BaseTimeFrame]):
         if not isinstance(time_frames, Iterable):
             raise TypeError(f"{time_frames} should be an iterable")
@@ -82,9 +58,6 @@ class BatchTimeFrame(BaseTimeFrame):
             for current_timeframe, candidate in zip(self, btf)
         )
 
-    def __getitem__(self, index: int) -> "TimeFrame":
-        return self.time_frames[index]
-
     @staticmethod
     def _is_timeframe_or_empty(obj) -> bool:
         # nested batches is not allowed
@@ -95,19 +68,11 @@ class BatchTimeFrame(BaseTimeFrame):
 
     @property
     def len_timeframes(self):
-        warnings.warn(
-            "len_timeframes is deprecated, use len(self.time_frames) instead",
-            DeprecationWarning,
-        )
         return len(self.time_frames)
 
     @property
     def duration(self) -> float:
-        warnings.warn("duration is deprecated, use len() instead", DeprecationWarning)
         return sum(time_frame.duration for time_frame in self)
-
-    def __len__(self):
-        return sum(map(len, self))
 
     def _extend(self, tf: "TimeFrame"):
         # TODO: There might be a better solution to reduce the time complexity
@@ -125,10 +90,6 @@ class BatchTimeFrame(BaseTimeFrame):
             self.time_frames.append(tf)
 
     def includes(self, tf: BaseTimeFrame) -> bool:
-        warnings.warn(
-            "includes is deprecated, use `in` keyword instead", DeprecationWarning
-        )
-
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
@@ -148,19 +109,6 @@ class BatchTimeFrame(BaseTimeFrame):
                 return True
 
         return False
-
-    def __contains__(self, tf: BaseTimeFrame):
-        if not isinstance(tf, BaseTimeFrame):
-            raise TypeError(f"{tf} should be a BaseTimeFrame")
-
-        if isinstance(tf, TimeFrame):
-            for current_timeframe in self:
-                if tf in current_timeframe:
-                    return True
-            return False
-
-        # isinstance(tf, BatchTimeFrame)
-        raise NotImplementedError("BatchTimeFrame is not supported for inclusion!")
 
     def _has_common_ground(self, _: BaseTimeFrame) -> bool:  # pragma: no cover
         return False
@@ -197,15 +145,19 @@ class BatchTimeFrame(BaseTimeFrame):
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
-        if isinstance(tf, TimeFrame):
-            return BatchTimeFrame(
-                [current_timeframe - tf for current_timeframe in self]
-            )
+        if not isinstance(tf, BatchTimeFrame):
+            candidates = [tf]
+        else:
+            candidates = tf
 
-        if isinstance(tf, _Empty):
-            return self
+        result = list(self)
 
-        raise NotImplementedError("BatchTimeFrame is not supported for subtraction!")
+        for candidate in candidates:
+            for index, current_timeframe in enumerate(result):
+                if candidate._has_common_ground(current_timeframe):
+                    result[index] = current_timeframe - candidate
+
+        return BatchTimeFrame(result)
 
     def __repr__(self) -> str:
         return "\n".join(str(tf) for tf in list(self))
@@ -228,24 +180,7 @@ class TimeFrame(BaseTimeFrame):
         self.start = start_datetime
         self.end = end_datetime
 
-    def __contains__(self, tf: BaseTimeFrame):
-        if not isinstance(tf, BaseTimeFrame):
-            raise TypeError(f"{tf} should be a BaseTimeFrame")
-
-        if isinstance(tf, TimeFrame):
-            return self.start <= tf.start <= tf.end <= self.end
-
-        if isinstance(tf, _Empty):
-            return True  # rather controversial and philosophical!
-
-        # isinstance(tf, BatchTimeFrame)
-        return all(tf in self for tf in tf)
-
     def includes(self, dt: Union[datetime, BaseTimeFrame]) -> bool:
-        warnings.warn(
-            "includes is deprecated, use `in` keyword instead", DeprecationWarning
-        )
-
         if not isinstance(dt, (datetime, BaseTimeFrame)):
             raise TypeError(f"{dt} should be either a datetime or a BaseTimeFrame")
 
@@ -263,11 +198,7 @@ class TimeFrame(BaseTimeFrame):
 
     @property
     def duration(self) -> float:
-        warnings.warn("duration is deprecated, use len() instead", DeprecationWarning)
         return (self.end - self.start).total_seconds()
-
-    def __len__(self) -> int:
-        return int((self.end - self.start).total_seconds())
 
     def __gt__(self, tf: BaseTimeFrame) -> bool:
         if not isinstance(tf, BaseTimeFrame):
@@ -304,10 +235,9 @@ class TimeFrame(BaseTimeFrame):
         return self.start == tf.start and self.end == tf.end
 
     def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
-        warnings.warn(
-            "_has_common_ground is deprecated, use `in` keyword instead",
-            DeprecationWarning,
-        )
+
+        if isinstance(tf, _Empty):
+            return False
 
         return (
             self.start < tf.start < self.end
@@ -368,7 +298,7 @@ class TimeFrame(BaseTimeFrame):
         if isinstance(tf, BatchTimeFrame):
             return reduce(TimeFrame.__sub__, tf, self)
 
-        if self in tf:
+        if tf.includes(self) or self == tf:
             return _Empty()
         elif self.includes(tf):
             first_upper = tf.start - timedelta(microseconds=1)

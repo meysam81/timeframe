@@ -98,58 +98,10 @@ def test_timeframe_never_includes_empty_timeframe():
     assert not tf1.includes(tf3 * tf5)
 
 
-def test_timeframe_include_warns_deprecated():
-    slavery_emancipation_sign_date = TimeFrame(
-        datetime(1863, 1, 1, 10), datetime(1863, 1, 1, 11)
-    )
-    pioneer_10_reaches_jupyter = TimeFrame(
-        datetime(1973, 12, 4, 10), datetime(1973, 12, 4, 11)
-    )
-    with pytest.warns(DeprecationWarning):
-        slavery_emancipation_sign_date.includes(pioneer_10_reaches_jupyter)
-
-
-def test_timeframe_inclusion_with_in_keyword():
-    world_war_1_start = TimeFrame(datetime(1914, 7, 28, 10), datetime(1914, 7, 28, 11))
-    world_war_1_end = TimeFrame(datetime(1918, 11, 11, 10), datetime(1918, 11, 11, 11))
-
-    assert world_war_1_start not in world_war_1_end
-
-
-def test_timeframe_inclusion_non_base_timeframe_yells_type_error(random_timeframe):
-    with pytest.raises(TypeError):
-        1 in random_timeframe
-
-    with pytest.raises(TypeError):
-        1.0 in random_timeframe
-
-    with pytest.raises(TypeError):
-        "dummy" in random_timeframe
-
-
-def test_timeframe_inclusion_check_batch_timeframe_checks_all_timeframes():
-    world_war_1 = TimeFrame(datetime(1914, 7, 28), datetime(1918, 11, 11))
-    world_war_2 = TimeFrame(datetime(1939, 9, 1), datetime(1945, 9, 2))
-    german_invades_paris = TimeFrame(datetime(1940, 6, 4), datetime(1940, 6, 4))
-
-    assert BatchTimeFrame([german_invades_paris]) in world_war_2
-    assert BatchTimeFrame([german_invades_paris]) not in world_war_1
-
-
 # ======================= Duration ============================
 def test_timeframe_duration_calculation_is_correct():
     tf = TimeFrame(datetime(2021, 1, 15, 12), datetime(2021, 1, 15, 13))
     assert tf.duration == 3600.0
-
-
-def test_timeframe_using_duration_produces_warning():
-    with pytest.warns(DeprecationWarning):
-        TimeFrame(datetime(2021, 1, 15, 12), datetime(2021, 1, 15, 13)).duration
-
-
-def test_timeframe_len_produces_subtract_of_start_till_end():
-    ides_of_march = TimeFrame(datetime(2021, 3, 15, 10), datetime(2021, 3, 15, 11))
-    assert len(ides_of_march) == 3600.0
 
 
 # ======================= Greater Than ============================
@@ -438,7 +390,7 @@ def test_timeframe_add_with_non_batch_timeframe_raises_type_error():
 
 
 # ======================= Substraction ============================
-def test_timeframe_sub_without_overlap_gives_accurate_subtract():
+def test_timeframe_sub_without_overlap_gives_accurate_substract():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10))
 
@@ -448,7 +400,7 @@ def test_timeframe_sub_without_overlap_gives_accurate_subtract():
     assert assertion.duration == tf1.duration
 
 
-def test_timeframe_sub_with_half_overlap_greater_start_gives_accurate_subtract():
+def test_timeframe_sub_with_half_overlap_greater_start_gives_accurate_substract():
     tf1 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10, 30))
     tf2 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
 
@@ -459,7 +411,7 @@ def test_timeframe_sub_with_half_overlap_greater_start_gives_accurate_subtract()
     assert assertion.duration == expected.duration
 
 
-def test_timeframe_sub_with_half_overlap_lower_start_gives_accurate_subtract():
+def test_timeframe_sub_with_half_overlap_lower_start_gives_accurate_substract():
     tf1 = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
     tf2 = TimeFrame(datetime(2021, 1, 16, 22), datetime(2021, 1, 17, 10, 30))
 
@@ -470,7 +422,7 @@ def test_timeframe_sub_with_half_overlap_lower_start_gives_accurate_subtract():
     assert assertion.duration == expected.duration
 
 
-def test_timeframe_sub_from_superset_gives_accurate_subtract():
+def test_timeframe_sub_from_superset_gives_accurate_substract():
     tf1 = TimeFrame(datetime(2021, 1, 17, 8), datetime(2021, 1, 17, 12))
     tf2 = TimeFrame(datetime(2021, 1, 17, 7), datetime(2021, 1, 17, 13))
 
@@ -479,7 +431,7 @@ def test_timeframe_sub_from_superset_gives_accurate_subtract():
     assert assertion.duration == 0
 
 
-def test_timeframe_subtract_from_batch_timeframe_successfully():
+def test_timeframe_substract_from_batch_timeframe_successfully():
     tf1 = TimeFrame(datetime(2021, 1, 18, 10), datetime(2021, 1, 18, 11))
     tf2 = TimeFrame(datetime(2021, 1, 18, 12), datetime(2021, 1, 18, 14))
     tf3 = TimeFrame(datetime(2021, 1, 18, 18), datetime(2021, 1, 18, 20))
@@ -508,7 +460,7 @@ def test_timeframe_sub_from_subset_gives_a_batch_timeframe():
     )
 
 
-def test_timeframe_subtraction_with_non_base_timeframe_raises_type_error():
+def test_timeframe_substraction_with_non_base_timeframe_raises_type_error():
     tf = TimeFrame(datetime(2021, 1, 17, 10), datetime(2021, 1, 17, 11))
 
     with pytest.raises(TypeError):
@@ -528,13 +480,3 @@ def test_timeframe_subtraction_with_non_base_timeframe_raises_type_error():
 
     with pytest.raises(TypeError):
         tf - [1, 1.0, "dummy", True]
-
-
-def test_timeframe_subtraction_from_bigger_timeframe_returns_empty():
-    tf1 = TimeFrame(datetime(2022, 2, 22), datetime(2022, 2, 23))
-    tf2 = TimeFrame(datetime(2022, 2, 22), datetime(2022, 2, 24))
-
-    minus_result = tf1 - tf2
-
-    assert len(minus_result) == 0
-    assert "empty" in repr(minus_result).lower()
