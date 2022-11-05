@@ -4,6 +4,10 @@ from datetime import datetime, timedelta
 from functools import reduce
 from typing import Iterable, Union
 
+INCLUDES_DEPRECATION_WARNING = (
+    "includes is deprecated, please use the `in` operator instead"
+)
+
 
 class BaseTimeFrame(metaclass=abc.ABCMeta):  # pragma: no cover
     @property
@@ -35,10 +39,7 @@ class _Empty(BaseTimeFrame):
         return False
 
     def includes(self, _: BaseTimeFrame) -> bool:
-        warnings.warn(
-            "includes is deprecated, please use the `in` operator instead",
-            DeprecationWarning,
-        )
+        warnings.warn(INCLUDES_DEPRECATION_WARNING, DeprecationWarning)
 
         return False
 
@@ -104,7 +105,7 @@ class BatchTimeFrame(BaseTimeFrame):
 
     def includes(self, tf: BaseTimeFrame) -> bool:
         warnings.warn(
-            "includes is deprecated, please use the `in` operator instead",
+            INCLUDES_DEPRECATION_WARNING,
             DeprecationWarning,
         )
 
@@ -222,7 +223,7 @@ class TimeFrame(BaseTimeFrame):
 
     def includes(self, dt: Union[datetime, BaseTimeFrame]) -> bool:
         warnings.warn(
-            "includes is deprecated, please use the `in` operator instead",
+            INCLUDES_DEPRECATION_WARNING,
             DeprecationWarning,
         )
 
