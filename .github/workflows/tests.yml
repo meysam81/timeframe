@@ -15,14 +15,14 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
       - name: Prepare
         run: |
           pip install -U pip tox
-      - name: Run tests ${{ matrix.python-version }}
-        run: |
-          tox -e ${{ matrix.python-version }}
+      - name: Run tests
+        run: tox -e py${{ matrix.python-version }}
       - name: Coverage Report
+        if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -31,8 +31,9 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - py3.6
-          - py3.7
-          - py3.8
-          - py3.9
-          - py3.10
+          - "3.6"
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
