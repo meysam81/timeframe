@@ -19,3 +19,10 @@ def random_batch_timeframes(faker):
         return TimeFrame(start, end)
 
     return BatchTimeFrame([get_timeframe() for _ in range(10)])
+
+
+@pytest.fixture(scope="session", autouse=True)
+def faker_seed():
+    import time
+
+    return time.time()
