@@ -1,21 +1,26 @@
 import abc
+import warnings
 from datetime import datetime, timedelta
 from functools import reduce
 from typing import Iterable, Union
 
 
-class BaseTimeFrame(metaclass=abc.ABCMeta):
+class BaseTimeFrame(metaclass=abc.ABCMeta):  # pragma: no cover
     @property
     @abc.abstractmethod
-    def duration(self) -> float:  # pragma: no cover
+    def duration(self) -> float:
         pass
 
     @abc.abstractmethod
-    def _has_common_ground(self, tf: "BaseTimeFrame") -> bool:  # pragma: no cover
+    def _has_common_ground(self, tf: "BaseTimeFrame") -> bool:
         pass
 
     @abc.abstractmethod
-    def includes(self, tf: "BaseTimeFrame") -> bool:  # pragma: no cover
+    def includes(self, tf: "BaseTimeFrame") -> bool:
+        pass
+
+    @abc.abstractmethod
+    def __contains__(self, tf: "BaseTimeFrame") -> bool:
         pass
 
 
@@ -23,10 +28,18 @@ class _Empty(BaseTimeFrame):
     def __repr__(self):
         return "Empty TimeFrame"
 
-    def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
+    def _has_common_ground(self, _: BaseTimeFrame) -> bool:
         return False
 
-    def includes(self, tf: BaseTimeFrame) -> bool:
+    def __contains__(self, _: BaseTimeFrame) -> bool:
+        return False
+
+    def includes(self, _: BaseTimeFrame) -> bool:
+        warnings.warn(
+            "includes is deprecated, please use the `in` operator instead",
+            DeprecationWarning,
+        )
+
         return False
 
     @property
@@ -90,6 +103,11 @@ class BatchTimeFrame(BaseTimeFrame):
             self.time_frames.append(tf)
 
     def includes(self, tf: BaseTimeFrame) -> bool:
+        warnings.warn(
+            "includes is deprecated, please use the `in` operator instead",
+            DeprecationWarning,
+        )
+
         if not isinstance(tf, BaseTimeFrame):
             raise TypeError(f"{tf} should be a BaseTimeFrame")
 
@@ -203,6 +221,11 @@ class TimeFrame(BaseTimeFrame):
         self.end = end_datetime
 
     def includes(self, dt: Union[datetime, BaseTimeFrame]) -> bool:
+        warnings.warn(
+            "includes is deprecated, please use the `in` operator instead",
+            DeprecationWarning,
+        )
+
         if not isinstance(dt, (datetime, BaseTimeFrame)):
             raise TypeError(f"{dt} should be either a datetime or a BaseTimeFrame")
 

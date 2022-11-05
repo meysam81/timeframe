@@ -98,6 +98,54 @@ def test_timeframe_never_includes_empty_timeframe():
     assert not tf1.includes(tf3 * tf5)
 
 
+def test_timeframe_inclusion_check_with_in_keyword(faker):
+    dt1 = faker.date_time()
+    dt2 = faker.date_time_between(start_date=dt1)
+    dt3 = faker.date_time_between(start_date=dt1, end_date=dt2)
+    dt4 = faker.date_time_between(start_date=dt2)
+
+    tf = TimeFrame(dt1, dt2)
+
+    assert dt3 in tf
+    assert dt4 not in tf
+
+
+def test_timeframe_inclusion_check_with_in_keyword_other_types_raise_type_error(faker):
+    dt1 = faker.date_time()
+    dt2 = faker.date_time_between(start_date=dt1)
+    tf = TimeFrame(dt1, dt2)
+
+    with pytest.raises(TypeError):
+        faker.pyint() in tf
+
+    with pytest.raises(TypeError):
+        faker.pyfloat() in tf
+
+    with pytest.raises(TypeError):
+        faker.text() in tf
+
+
+def test_timeframe_inclusion_check_with_in_keyword_to_batch_timeframe(faker):
+    dt1 = faker.date_time()
+    dt2 = faker.date_time_between(start_date=dt1)
+
+    dt3 = faker.date_time_between(start_date=dt1, end_date=dt2)
+    dt4 = faker.date_time_between(start_date=dt3, end_date=dt2)
+
+    tf = TimeFrame(dt1, dt2)
+
+    assert BatchTimeFrame([TimeFrame(dt3, dt4)]) in tf
+
+
+def test_timeframe_inclusion_check_with_include_warns_deprecation(
+    faker, random_timeframe
+):
+    dt = faker.date_time()
+
+    with pytest.warns(DeprecationWarning):
+        random_timeframe.includes(dt)
+
+
 # ======================= Duration ============================
 def test_timeframe_duration_calculation_is_correct():
     tf = TimeFrame(datetime(2021, 1, 15, 12), datetime(2021, 1, 15, 13))

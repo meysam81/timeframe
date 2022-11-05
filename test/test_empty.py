@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pytest
+
 from timeframe import TimeFrame
 
 
@@ -17,6 +19,23 @@ def test_empty_timeframe_doesnt_include_anything():
     assert not (tf1 * tf2).includes(tf5)
 
 
+def test_empty_timeframe_inclusion_check_always_returns_false(
+    faker, random_timeframe, random_batch_timeframes, empty_timeframe
+):
+    for instance in [faker.date_time(), random_timeframe, random_batch_timeframes]:
+        assert instance not in empty_timeframe
+
+
+def test_empty_timeframe_inclusion_check_with_include_warns_deprecation(
+    faker, empty_timeframe
+):
+    dt = faker.date_time()
+
+    with pytest.warns(DeprecationWarning):
+        empty_timeframe.includes(dt)
+
+
+# ======================= Repr ============================
 def test_empty_timeframe_repr():
     tf1 = TimeFrame(datetime(2022, 10, 15), datetime(2022, 10, 16))
     tf2 = TimeFrame(datetime(2022, 10, 17), datetime(2022, 10, 18))
