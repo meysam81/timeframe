@@ -281,7 +281,6 @@ class TimeFrame(BaseTimeFrame):
         return self.start == tf.start and self.end == tf.end
 
     def _has_common_ground(self, tf: BaseTimeFrame) -> bool:
-
         if isinstance(tf, _Empty):
             return False
 
