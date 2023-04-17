@@ -1,5 +1,29 @@
 # TimeFrame
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [TimeFrame](#timeframe)
+  - [Introduction](#introduction)
+  - [Install](#install)
+  - [Examples](#examples)
+    - [Inclusion](#inclusion)
+      - [New API](#new-api)
+      - [Deprecated](#deprecated)
+    - [Duration](#duration)
+    - [Comparison](#comparison)
+    - [Overlap](#overlap)
+    - [Summation (union)](#summation-union)
+    - [Minus](#minus)
+  - [Acknowledgment](#acknowledgment)
+  - [Contribution](#contribution)
+  - [Stargazers over time](#stargazers-over-time)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+
 [![linter](https://github.com/meysam81/timeframe/actions/workflows/linter.yml/badge.svg?branch=main&event=push)](./.pre-commit-config.yaml)
 [![tests](https://github.com/meysam81/timeframe/actions/workflows/tests.yml/badge.svg?branch=main)](./tox.ini)
 [![codecov](https://codecov.io/gh/meysam81/timeframe/branch/main/graph/badge.svg?token=NM0LMWP0X2)](https://codecov.io/gh/meysam81/timeframe)
@@ -227,3 +251,7 @@ feel like it. 🥂
 
 Any contribution of any size is greatly appreciated. Feel free to open a PR or
 issue in the github page at any time. 🤗
+
+## Stargazers over time
+
+[![Star History Chart](https://api.star-history.com/svg?repos=meysam81/timeframe&type=Date)](https://star-history.com/#meysam81/timeframe&Date)
