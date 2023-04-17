@@ -235,7 +235,6 @@ def test_batch_timeframe_inclusion_check_with_other_types_raise_value_error(fake
 def test_batch_timeframe_inclusion_check_with_include_warns_deprecation(
     random_timeframe, random_batch_timeframes
 ):
-
     with pytest.warns(DeprecationWarning):
         random_batch_timeframes.includes(random_timeframe)
 
