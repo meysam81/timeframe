@@ -1,13 +1,13 @@
 repos:
   - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
         stages: [commit]
         args: ["--profile", "black"]
 
   - repo: https://github.com/PyCQA/autoflake
-    rev: v2.1.0
+    rev: v2.3.1
     hooks:
       - id: autoflake
         stages: [commit]
@@ -21,7 +21,29 @@ repos:
           ]
 
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 24.3.0
     hooks:
       - id: black
         stages: [commit]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=600"]
+      - id: check-ast
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-shebang-scripts-are-executable
+        exclude: .*templates/.*j2$
+      - id: check-yaml
+        args:
+          - --allow-multiple-documents
+      - id: detect-private-key
+      - id: detect-aws-credentials
+      - id: end-of-file-fixer
+      - id: name-tests-test
+      - id: file-contents-sorter
+      - id: requirements-txt-fixer
+      - id: sort-simple-yaml
+      - id: trailing-whitespace
