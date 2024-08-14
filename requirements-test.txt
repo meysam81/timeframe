@@ -1,5 +1,5 @@
 coverage~=7.6
-faker~=26.1
+faker~=27.0
 pytest~=8.3
 pytest-asyncio~=0.23
 pytest-repeat~=0.9
