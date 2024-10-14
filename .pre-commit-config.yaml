@@ -3,14 +3,14 @@ repos:
     rev: 5.13.2
     hooks:
       - id: isort
-        stages: [commit]
+        stages: [pre-commit]
         args: ["--profile", "black"]
 
   - repo: https://github.com/PyCQA/autoflake
     rev: v2.3.1
     hooks:
       - id: autoflake
-        stages: [commit]
+        stages: [pre-commit]
         args:
           [
             "-ri",
@@ -24,7 +24,7 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
-        stages: [commit]
+        stages: [pre-commit]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
