@@ -190,7 +190,7 @@ def test_batch_timeframe_inclusion_check_with_in_keyword(faker, empty_timeframe)
     dt4 = dt2 - timedelta(days=1)
 
     dt5 = faker.date_time_between(start_date="now", end_date="+1y")
-    dt6 = faker.date_time_between(start_date=dt5)
+    dt6 = faker.date_time_between(start_date="+2y")
 
     tf1 = TimeFrame(dt1, dt2)
     tf2 = TimeFrame(dt3, dt4)
