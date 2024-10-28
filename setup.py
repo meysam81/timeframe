@@ -15,14 +15,6 @@ PACKAGE_VERSION = os.getenv(
 )
 
 
-if sys.version_info < (3, 8):
-    warnings.warn(
-        "Python 3.7 support will be dropped in the next release (v3.x.x).",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-
-
 setuptools.setup(
     name=timeframe.__name__,
     version=PACKAGE_VERSION,
