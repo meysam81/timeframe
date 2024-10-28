@@ -1,4 +1,5 @@
 import os
+from distutils.command.install import install as _install
 
 import setuptools
 
@@ -11,6 +12,17 @@ PACKAGES = setuptools.find_packages(include=("timeframe",))
 PACKAGE_VERSION = os.getenv(
     "PACKAGE_VERSION", getattr(timeframe, "__version__", "0.0.0")
 )
+
+
+class CustomInstallCommand(_install):
+    def run(self):
+        _install.run(self)
+        if self.distribution.python_requires.startswith(">=3.7"):
+            print(
+                "WARNING: Python 3.7 is deprecated and will be removed in the next major release (v3.x.x). "
+                "Please upgrade to a newer version of Python."
+            )
+
 
 setuptools.setup(
     name=timeframe.__name__,
@@ -37,4 +49,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.14",
     ],
     python_requires=">=3.7, <4",
+    cmdclass={
+        "install": CustomInstallCommand,
+    },
 )
