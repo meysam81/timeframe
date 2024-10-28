@@ -11,7 +11,7 @@ on:
     branches:
       - main
     tags:
-      - '*'
+      - "*"
   schedule:
     - cron: "45 10 * * 1"
 
@@ -160,3 +160,34 @@ jobs:
         uses: actions/checkout@v4
       - name: "Dependency Review"
         uses: actions/dependency-review-action@v4
+
+  trivy:
+    if: contains(fromJson('["push","pull_request","schedule"]'), github.event_name)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Trivy vulnerability scanner in fs mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          exit-code: "1"
+          format: template
+          output: trivy-results.sarif
+          scan-ref: .
+          scan-type: fs
+          template: "@/contrib/sarif.tpl"
+          trivy-config: trivy.yaml
+      - if: failure()
+        name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+      - if: always()
+        name: Upload Trivy results to Github Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-results
+          path: trivy-results.sarif

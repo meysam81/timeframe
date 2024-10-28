@@ -1,0 +1,14 @@
+quiet: false
+debug: false
+insecure: false
+timeout: 1m
+cache:
+  dir: .pre-commit-trivy-cache
+scan:
+  skip-dirs: []
+misconfiguration:
+  terraform:
+    exclude-downloaded-modules: false
+severity:
+  - HIGH
+  - CRITICAL
