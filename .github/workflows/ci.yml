@@ -190,15 +190,3 @@ jobs:
         with:
           name: trivy-results
           path: trivy-results.sarif
-
-  release-please:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - name: Release please
-        uses: googleapis/release-please-action@v4
-        with:
-          release-type: simple
