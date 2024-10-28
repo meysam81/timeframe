@@ -1,5 +1,5 @@
-coverage~=7.6
-faker~=30.8
-pytest~=8.3
-pytest-asyncio~=0.24
-pytest-repeat~=0.9
+coverage<8
+faker<19
+pytest<8
+pytest-asyncio<1
+pytest-repeat<1
