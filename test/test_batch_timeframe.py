@@ -182,7 +182,7 @@ def test_batch_timeframe_includes_with_wrong_type_raises_error():
 
 def test_batch_timeframe_inclusion_check_with_in_keyword(faker, empty_timeframe):
     dt1 = faker.date_time_between(start_date="-1y", end_date="-6M")
-    dt2 = faker.date_time_between(start_date=dt1, end_date="now")
+    dt2 = faker.date_time_between(start_date="-5M", end_date="now")
 
     dt12 = faker.date_time_between(start_date=dt1, end_date=dt2)
 
