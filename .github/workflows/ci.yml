@@ -46,7 +46,7 @@ jobs:
         run: tox -e py${{ matrix.python-version }}
       - name: Coverage Report
         if: github.ref == 'refs/heads/main'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
