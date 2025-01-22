@@ -1,5 +1,5 @@
 coverage<8
-faker<34
+faker<35
 pytest<9
 pytest-asyncio<1
 pytest-repeat<1
