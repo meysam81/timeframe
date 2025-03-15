@@ -1,17 +1,12 @@
 # TimeFrame
 
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://developer.mend.io/github/meysam81/timeframe)
-[![linter](https://github.com/meysam81/timeframe/actions/workflows/linter.yml/badge.svg?branch=main&event=push)](./.pre-commit-config.yaml)
-[![tests](https://github.com/meysam81/timeframe/actions/workflows/tests.yml/badge.svg?branch=main)](./tox.ini)
 [![codecov](https://codecov.io/gh/meysam81/timeframe/branch/main/graph/badge.svg?token=NM0LMWP0X2)](https://codecov.io/gh/meysam81/timeframe)
 [![License](https://img.shields.io/github/license/meysam81/timeframe)](./LICENSE)
 [![Stars](https://img.shields.io/github/stars/meysam81/timeframe?label=GitHub%20stars&style=flat)](https://github.com/meysam81/timeframe/stargazers)
 [![Downloads](https://img.shields.io/pypi/dm/timeframe)](https://pypi.org/project/timeframe/)
 [![Open Issues](https://img.shields.io/github/issues-raw/meysam81/timeframe)](https://github.com/meysam81/timeframe/issues)
 [![Open PRs](https://img.shields.io/github/issues-pr-raw/meysam81/timeframe)](https://github.com/meysam81/timeframe/pulls)
-[![CodeClimate Maintainability](https://img.shields.io/codeclimate/maintainability/meysam81/timeframe)](https://codeclimate.com/github/meysam81/timeframe)
-[![CodeClimate Issues](https://img.shields.io/codeclimate/issues/meysam81/timeframe?label=codeclimate%20issues)](https://codeclimate.com/github/meysam81/timeframe/issues)
-[![CodeClimate Tech Debt](https://img.shields.io/codeclimate/tech-debt/meysam81/timeframe)](https://codeclimate.com/github/meysam81/timeframe/trends/technical_debt)
 [![Contributors](https://img.shields.io/github/contributors/meysam81/timeframe)](https://github.com/meysam81/timeframe/graphs/contributors)
 [![Version](https://img.shields.io/pypi/v/timeframe)](https://pypi.org/project/timeframe/)
 [![Python](https://img.shields.io/pypi/pyversions/timeframe)](https://pypi.org/project/timeframe/)
