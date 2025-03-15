@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "@semantic-release/exec": "^7.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "ms": "^2.1.3"
+  }
+}

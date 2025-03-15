@@ -1,5 +1,6 @@
 # TimeFrame
 
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://developer.mend.io/github/meysam81/timeframe)
 [![linter](https://github.com/meysam81/timeframe/actions/workflows/linter.yml/badge.svg?branch=main&event=push)](./.pre-commit-config.yaml)
 [![tests](https://github.com/meysam81/timeframe/actions/workflows/tests.yml/badge.svg?branch=main)](./tox.ini)
 [![codecov](https://codecov.io/gh/meysam81/timeframe/branch/main/graph/badge.svg?token=NM0LMWP0X2)](https://codecov.io/gh/meysam81/timeframe)

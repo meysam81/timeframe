@@ -1,7 +1,4 @@
 name: ci
-concurrency:
-  cancel-in-progress: ${{ ! startsWith(github.ref, 'refs/tags/') }}
-  group: ci-${{ github.ref_name }}-${{ github.event_name }}
 
 on:
   pull_request:
@@ -16,7 +13,7 @@ on:
     - cron: "45 10 * * 1"
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.x"
 
 jobs:
   tests:
@@ -52,12 +49,27 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
-  publish-pypi:
-    if: startsWith(github.ref, 'refs/tags/')
+  semantic-release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ssh-key: ${{ secrets.GH_DEPLOY_KEY }}
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install bun deps
+        run: bun install
       - name: Setup python
         uses: actions/setup-python@v5
         with:
@@ -65,12 +77,25 @@ jobs:
       - name: Prepare
         run: |
           pip install -U pip wheel setuptools
-      - env:
-          PACKAGE_VERSION: ${{ github.head_ref || github.ref_name }}
+      - name: Install goreleaser
+        run: |
+          echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
+          sudo apt update
+          sudo apt install -y goreleaser
+          goreleaser --version
+      - id: semantic-release
+        name: Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bunx semantic-release@v24
+      - if: steps.semantic-release.outputs.version != ''
+        env:
+          PACKAGE_VERSION: ${{ steps.semantic-release.outputs.version }}
         name: Build package
         run: |
           python setup.py sdist bdist_wheel
-      - name: Publish PyPi
+      - if: steps.semantic-release.outputs.version != ''
+        name: Publish PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
@@ -110,40 +135,15 @@ jobs:
       fail-fast: false
       matrix:
         language: ["python"]
-        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
-        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          # If you wish to specify custom queries, you can do so here or in a config file.
-          # By default, queries listed here will override any specified in a config file.
-          # Prefix the list here with "+" to use these queries and those in the config file.
-
-          # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
-          # queries: security-extended,security-and-quality
-
-      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
-      # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
-
-      # ℹ️ Command-line programs to run using the OS shell.
-      # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-
-      #   If the Autobuild fails above, remove it and uncomment the following three lines.
-      #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
-
-      # - run: |
-      #   echo "Run, Build Application using script"
-      #   ./location_of_script_within_repo/buildscript.sh
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:

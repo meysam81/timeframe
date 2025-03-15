@@ -1,3 +1,16 @@
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    [skip ci]
+  autofix_prs: true
+  autoupdate_commit_msg: |
+    [pre-commit.ci] pre-commit autoupdate
+
+    [skip ci]
+  autoupdate_schedule: weekly
+  submodules: false
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -62,3 +75,7 @@ repos:
           - --fix
           - --select=I
       - id: ruff-format
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint

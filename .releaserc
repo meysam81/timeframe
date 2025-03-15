@@ -1,0 +1,16 @@
+---
+branches:
+  - main
+plugins:
+  - - "@semantic-release/commit-analyzer"
+    - preset: angular
+      releaseRules:
+        - type: chore
+          release: patch
+  - "@semantic-release/release-notes-generator"
+  - "@semantic-release/git"
+  - "@semantic-release/github"
+  - - "@semantic-release/exec"
+    - successCmd: echo version=v${nextRelease.version} >> $GITHUB_OUTPUT
+      publishCmd: |
+        echo "${nextRelease.notes}" > /tmp/release-notes.md
