@@ -186,7 +186,7 @@ jobs:
           sarif_file: trivy-results.sarif
       - if: always()
         name: Upload Trivy results to Github Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: trivy-results
           path: trivy-results.sarif
