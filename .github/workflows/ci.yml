@@ -158,7 +158,7 @@ jobs:
       - name: "Checkout Repository"
         uses: actions/checkout@v4
       - name: "Dependency Review"
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5.0.0
 
   trivy:
     if: contains(fromJson('["push","pull_request","schedule"]'), github.event_name)
