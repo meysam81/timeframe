@@ -31,9 +31,9 @@ jobs:
           - "3.13"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Setup python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Prepare
@@ -43,13 +43,13 @@ jobs:
         run: tox -e py${{ matrix.python-version }}
       - name: Coverage Report
         if: github.ref == 'refs/heads/main'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
           verbose: true
 
-  semantic-release:
+  release-please:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -60,18 +60,11 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-          ssh-key: ${{ secrets.GH_DEPLOY_KEY }}
-      - name: Setup bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - name: Install bun deps
-        run: bun install
       - name: Setup python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Prepare
@@ -83,20 +76,21 @@ jobs:
           sudo apt update
           sudo apt install -y goreleaser
           goreleaser --version
-      - id: semantic-release
-        name: Release
+      - id: release-please
+        name: Release please
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+      - if: steps.release-please.outputs.releases_created == 'true'
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: bunx semantic-release@v24
-      - if: steps.semantic-release.outputs.version != ''
-        env:
-          PACKAGE_VERSION: ${{ steps.semantic-release.outputs.version }}
+          PACKAGE_VERSION: ${{ steps.release-please.outputs.tag_name }}
         name: Build package
         run: |
           python setup.py sdist bdist_wheel
-      - if: steps.semantic-release.outputs.version != ''
+      - if: steps.release-please.outputs.releases_created == 'true'
         name: Publish PyPi
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
@@ -105,9 +99,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Setup python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Prepare
@@ -118,7 +112,7 @@ jobs:
           pre-commit run -a
       - if: failure()
         name: Commit linting changes
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
         with:
           message: "chore: lint 🚨"
           new_branch: ${{ github.head_ref || github.ref_name }}
@@ -137,15 +131,15 @@ jobs:
         language: ["python"]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3.39.1
         with:
           languages: ${{ matrix.language }}
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3.39.1
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3.39.1
         with:
           category: "/language:${{matrix.language}}"
 
@@ -156,9 +150,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: "Dependency Review"
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
 
   trivy:
     if: contains(fromJson('["push","pull_request","schedule"]'), github.event_name)
@@ -168,9 +162,9 @@ jobs:
       security-events: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Run Trivy vulnerability scanner in fs mode
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@8f28faec26515256b6d22074d1d2a8986f4cbd87 # master
         with:
           exit-code: "1"
           format: template
@@ -181,12 +175,12 @@ jobs:
           trivy-config: trivy.yaml
       - if: failure()
         name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3.39.1
         with:
           sarif_file: trivy-results.sarif
       - if: always()
         name: Upload Trivy results to Github Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: trivy-results
           path: trivy-results.sarif
